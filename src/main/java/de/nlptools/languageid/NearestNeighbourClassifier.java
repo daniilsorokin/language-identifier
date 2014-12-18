@@ -30,14 +30,14 @@ public class NearestNeighbourClassifier {
         FDistribution docsPerLanguage = new FDistribution();
         System.out.println("Processing domain files.");
         for (File file : domainFiles) {
-            HashMap<String, Integer> docNgramDist = new HashMap<>();
+            HashMap<String, Double> docNgramDist = new HashMap<>();
             try {
                 docNgramDist = DocumentTools.getDocumentBigramFDistribution(file);
             } catch (IOException ex) {
                 Logger.getLogger(DocumentRepresentationConstructor.class.getName()).log(Level.SEVERE, null, ex);
             }
             String lang = DocumentTools.getDocumentLanguageFromFileName(file);
-            docsPerLanguage.update(lang, 1);
+            docsPerLanguage.update(lang, 1.0);
 //            int documentCount = languages.containsKey(lang) ? languages.get(lang) : 0;
 //            languages.put(lang, documentCount + 1);
             documentVectors.put(file.getName(),docNgramDist);
@@ -96,7 +96,7 @@ public class NearestNeighbourClassifier {
         File[] langFiles = new File(dir + "wikiraw/lang/").listFiles();
         System.out.println("Processing lang documents.");
         for (File file : langFiles) {
-            HashMap<String, Integer> docNgramDist = new HashMap<>();
+            HashMap<String, Double> docNgramDist = new HashMap<>();
             try {
                 docNgramDist = DocumentTools.getDocumentBigramFDistribution(file);
             } catch (IOException ex) {
@@ -143,7 +143,7 @@ public class NearestNeighbourClassifier {
         HashMap<String, HashMap> documentVectors = new HashMap<>();
         FDistribution docsPerLanguage = new FDistribution();
         for (File file : documents) {
-            HashMap<String, Integer> docNgramDist = new HashMap<>();
+            HashMap<String, Double> docNgramDist = new HashMap<>();
             try {
                 docNgramDist = DocumentTools.getDocumentBigramFDistribution(file);
             } catch (IOException ex) {
@@ -151,7 +151,7 @@ public class NearestNeighbourClassifier {
                         .log(Level.SEVERE, null, ex);
             }
             String lang = DocumentTools.getDocumentLanguageFromFileName(file);
-            docsPerLanguage.update(lang, 1);
+            docsPerLanguage.update(lang, 1.0);
             documentVectors.put(file.getName(),docNgramDist);
             bigramDist.updateAll(docNgramDist);
         }        

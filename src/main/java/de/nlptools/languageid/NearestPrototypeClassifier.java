@@ -3,12 +3,7 @@ package de.nlptools.languageid;
 import de.nlptools.languageid.io.DocumentTools;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -24,168 +19,22 @@ public class NearestPrototypeClassifier {
         String dir = "/home/dsorokin/Downloads/ijcnlp2011-langid/";
         File[] domainFiles = new File(dir + "wikiraw/domain/").listFiles();
         
-        FDistribution bigramDist= new FDistribution();
-        int counter = 0;
-        HashMap<String, HashMap> documentVectors = new HashMap<>();
-        FDistribution docsPerLanguage = new FDistribution();
-        System.out.println("Processing domain files.");
-        for (File file : domainFiles) {
-            HashMap<String, Integer> docNgramDist = new HashMap<>();
-            try {
-                docNgramDist = DocumentTools.getDocumentBigramFDistribution(file);
-            } catch (IOException ex) {
-                Logger.getLogger(DocumentRepresentationConstructor.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            String lang = DocumentTools.getDocumentLanguageFromFileName(file);
-            docsPerLanguage.update(lang, 1);
-//            int documentCount = languages.containsKey(lang) ? languages.get(lang) : 0;
-//            languages.put(lang, documentCount + 1);
-            documentVectors.put(file.getName(),docNgramDist);
-            counter++;
-            if(counter % 500 == 0) System.out.println("Documents processed: " + counter);
-            bigramDist.updateAll(docNgramDist);
-//            for (String ngram : docNgramDist.keySet()) {
-//                int ngramCount = bigramDist.containsKey(ngram) ? bigramDist.get(ngram) : 0;
-//                bigramDist.put(ngram, ngramCount + docNgramDist.get(ngram));
-//            }
-        }
-        
-        System.out.println("Unique ngrams: " + bigramDist.size());
-        List<String> ngrams = bigramDist.getSortedKeys();
-//        List<Map.Entry<String,Integer>> ngrams = new ArrayList<>(bigramDist.entrySet());
-//        Collections.sort(ngrams, new Comparator<Map.Entry<String,Integer>>() {
-//            @Override
-//            public int compare(Map.Entry<String,Integer> t1, Map.Entry<String,Integer> t2) {
-//                return (t2.getValue()).compareTo(t1.getValue());
-//            }
-//        });
-        for (int i = 0; i < 10; i++) {
-            System.out.print(ngrams.get(i) + ":"  + bigramDist.get(ngrams.get(i)) + ", ");
-        }
-        System.out.println("\nLangIndex: " + docsPerLanguage.size() + docsPerLanguage);
-        
-        int featureVectorSize = 3000;
-        
-        HashMap<String, double[]> languageVectors = new HashMap<>();
-        for (String lang : docsPerLanguage.keySet()) {
-            languageVectors.put(lang, new double[featureVectorSize]);
-        }
-        
-        System.out.println("Merging data into language prototype vectors");
-        for (File file : domainFiles) {
-            String lang = file.getName().substring(0, file.getName().indexOf('_'));
-            double[] languagevector = languageVectors.get(lang);
-            HashMap<String, Integer> docNgramDist = documentVectors.get(file.getName());
-            for (int i = 0; i < featureVectorSize && i < ngrams.size(); i++) {
-                String ngram = ngrams.get(i);
-                Integer value = docNgramDist.get(ngram);
-                if(value != null) languagevector[i] =  languagevector[i] + value;
-            }
-        }
-        for (String lang : docsPerLanguage.keySet()) {
-            double[] languagevector = languageVectors.get(lang);
-            double docCount = docsPerLanguage.get(lang);
-            for (int i = 0; i < featureVectorSize; i++) {
-                double value = languagevector[i];
-                languagevector[i] = value / docCount;
-            }
-        }
-//        System.out.println("Example language vectors: " + Arrays.toString(languageVectors.get("en")));
+        NearestPrototypeClassifier classifier = new NearestPrototypeClassifier();
+        System.out.println("Building the classifier.");
+        classifier.build(domainFiles);
 
-        counter = 0;
         File[] langFiles = new File(dir + "wikiraw/lang/").listFiles();
-        System.out.println("Processing lang documents.");
-        for (File file : langFiles) {
-            HashMap<String, Integer> docNgramDist = new HashMap<>();
-            try {
-                docNgramDist = DocumentTools.getDocumentBigramFDistribution(file);
-            } catch (IOException ex) {
-                Logger.getLogger(DocumentRepresentationConstructor.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            documentVectors.put(file.getName(),docNgramDist);
-            counter++;
-            if(counter % 500 == 0) System.out.println("Documents processed: " + counter);
-        }
-        
-        System.out.println("Classify lang documents.");
+        System.out.println("Classifying lang documents.");
         int correctlyClassified = 0;
         int numberOfDocuments = langFiles.length;
         for (File file : langFiles) {
-            String goldLang = file.getName().substring(0, file.getName().indexOf('_'));
-            HashMap<String, Integer> docNgramDist = documentVectors.get(file.getName());
-            double[] documentVector = new double[featureVectorSize];
-            for (int i = 0; i < featureVectorSize && i < ngrams.size(); i++) {
-                String ngram = ngrams.get(i);
-                Double value = docNgramDist.containsKey(ngram) ? docNgramDist.get(ngram) : 0.0;
-                documentVector[i] = value;
-            }
-            String predicted = "";
-            double maxCosine = -2;
-            for (Map.Entry<String, double[]> entry : languageVectors.entrySet()) {
-                double cosine = cosine(documentVector, entry.getValue());
-                if(cosine > maxCosine) {
-                    maxCosine = cosine;
-                    predicted = entry.getKey();
-                }
-            }
+            String goldLang = DocumentTools.getDocumentLanguageFromFileName(file);
+            String predicted = classifier.predict(file);
             if (predicted.equals(goldLang)) correctlyClassified++;
         }
         double accuracy = (double) correctlyClassified / (double) numberOfDocuments;
         System.out.println("Accuracy: " + accuracy);
-
     }
-
-    public NearestPrototypeClassifier() {
-    }
-    
-    public void build(File[] documents){
-        FDistribution bigramDist = new FDistribution();
-        HashMap<String, HashMap> documentVectors = new HashMap<>();
-        FDistribution docsPerLanguage = new FDistribution();
-        for (File file : documents) {
-            HashMap<String, Integer> docNgramDist = new HashMap<>();
-            try {
-                docNgramDist = DocumentTools.getDocumentBigramFDistribution(file);
-            } catch (IOException ex) {
-                Logger.getLogger(NearestPrototypeClassifier.class.getName())
-                        .log(Level.SEVERE, null, ex);
-            }
-            String lang = DocumentTools.getDocumentLanguageFromFileName(file);
-            docsPerLanguage.update(lang, 1);
-            documentVectors.put(file.getName(),docNgramDist);
-            bigramDist.updateAll(docNgramDist);
-        }        
-        
-        List<String> ngrams = bigramDist.getSortedKeys();
-        int featureVectorSize = 3000;
-        
-        HashMap<String, double[]> languageVectors = new HashMap<>();
-        for (String lang : docsPerLanguage.keySet()) {
-            languageVectors.put(lang, new double[featureVectorSize]);
-        }
-        
-        System.out.println("Merging data into language prototype vectors");
-        for (File file : documents) {
-            String lang = file.getName().substring(0, file.getName().indexOf('_'));
-            double[] languagevector = languageVectors.get(lang);
-            HashMap<String, Integer> docNgramDist = documentVectors.get(file.getName());
-            for (int i = 0; i < featureVectorSize && i < ngrams.size(); i++) {
-                String ngram = ngrams.get(i);
-                Integer value = docNgramDist.get(ngram);
-                if(value != null) languagevector[i] =  languagevector[i] + value;
-            }
-        }
-        for (String lang : docsPerLanguage.keySet()) {
-            double[] languagevector = languageVectors.get(lang);
-            double docCount = docsPerLanguage.get(lang);
-            for (int i = 0; i < featureVectorSize; i++) {
-                double value = languagevector[i];
-                languagevector[i] = value / docCount;
-            }
-        }
-        
-    }
-    
     
     public static double cosine(double[] a, double[] b) {
         if(a.length != b.length) throw new RuntimeException();
@@ -199,5 +48,76 @@ public class NearestPrototypeClassifier {
         bmagn = Math.sqrt(bmagn);
         double cosine = abproduct / (amagn * bmagn);
         return cosine;
+    }    
+
+    private HashMap<String, double[]> languagePrototypes;
+    private int featureVectorSize = 10000;
+    private String[] selectedBigrams;
+    private String defaultLang = "en";
+    
+    public NearestPrototypeClassifier() {
+    }
+    
+    public void build(File[] documents) {
+        FDistribution bigramDist = new FDistribution();
+        FDistribution docsPerLanguage = new FDistribution();
+        HashMap<String, FDistribution> languageFDistributions = new HashMap<>();
+        
+        for (File file : documents) {
+            try {
+                HashMap<String, Double> docNgramDist = 
+                        DocumentTools.getDocumentBigramFDistribution(file);
+                String lang = 
+                        DocumentTools.getDocumentLanguageFromFileName(file);
+                docsPerLanguage.update(lang, 1.0);
+                if (!languageFDistributions.containsKey(lang))
+                    languageFDistributions.put(lang, new FDistribution());
+                languageFDistributions.get(lang).updateAll(docNgramDist);
+                bigramDist.updateAll(docNgramDist);
+            } catch (IOException ex) {
+                Logger.getLogger(NearestPrototypeClassifier.class.getName())
+                        .log(Level.SEVERE, null, ex);
+            }
+        }
+        
+        List<String> bigrams = bigramDist.getSortedKeys();
+        selectedBigrams = bigrams.subList(0, featureVectorSize).toArray(new String[featureVectorSize]);
+        languagePrototypes = new HashMap<>();
+        for (String lang : docsPerLanguage.keySet()) {            
+            double[] languageVector = new double[featureVectorSize];
+            FDistribution languageFDist = languageFDistributions.get(lang);
+            double numDocs = docsPerLanguage.get(lang);
+            for (int i = 0; i < featureVectorSize && i < bigrams.size(); i++) {
+                String ngram = bigrams.get(i);
+                Double value = languageFDist.get(ngram);
+                languageVector[i] = value != null ? value / numDocs : 0.0;
+            }
+            languagePrototypes.put(lang, languageVector);
+        }
+    }
+    
+    public String predict(File document) {
+        try {
+            HashMap<String, Double> docNgramDist = DocumentTools.getDocumentBigramFDistribution(document);
+            double[] documentVector = new double[featureVectorSize];
+            for (int i = 0; i < featureVectorSize; i++) {
+                String bigram = selectedBigrams[i];
+                Double value = docNgramDist.containsKey(bigram) ? docNgramDist.get(bigram) : 0.0;
+                documentVector[i] = value;
+            }
+            String predicted = "";
+            double maxCosine = -2;
+            for (Map.Entry<String, double[]> entry : languagePrototypes.entrySet()) {
+                double cosine = cosine(documentVector, entry.getValue());
+                if(cosine > maxCosine) {
+                    maxCosine = cosine;
+                    predicted = entry.getKey();
+                }
+            }
+            return predicted;
+        } catch (IOException ex) {
+            Logger.getLogger(DocumentRepresentationConstructor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return defaultLang;
     }
 }

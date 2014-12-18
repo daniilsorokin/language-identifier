@@ -12,15 +12,15 @@ import java.util.TreeMap;
 /**
  * @author Daniil Sorokin <daniil.sorokin@uni-tuebingen.de>
  */
-public class FDistribution extends HashMap<String, Integer> {
+public class FDistribution extends HashMap<String, Double> {
 
-    public void update(String key, Integer addValue){
-        int value = this.containsKey(key) ? this.get(key) : 0;
+    public void update(String key, Double addValue){
+        double value = this.containsKey(key) ? this.get(key) : 0.0;
         this.put(key, value + addValue);
     }
     
-    public void updateAll(HashMap<String, Integer> addValues) {
-        for (Entry<String, Integer> addValue : addValues.entrySet()) {
+    public void updateAll(HashMap<String, Double> addValues) {
+        for (Entry<String, Double> addValue : addValues.entrySet()) {
             this.update(addValue.getKey(), addValue.getValue());
         }
     }
@@ -33,9 +33,9 @@ public class FDistribution extends HashMap<String, Integer> {
     }
     
     private class MapComparator implements Comparator<String>{
-        HashMap<String, Integer> base;
+        HashMap<String, Double> base;
         
-        public MapComparator(HashMap<String, Integer> base){
+        public MapComparator(HashMap<String, Double> base){
             this.base = base;
         }
         

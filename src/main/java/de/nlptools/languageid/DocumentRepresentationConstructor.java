@@ -41,12 +41,12 @@ public class DocumentRepresentationConstructor {
         String dir = "/home/dsorokin/Downloads/ijcnlp2011-langid/";
         File[] domainFiles = new File(dir + "wikiraw/domain/").listFiles();
         
-        HashMap<String, Integer> ngramDist= new HashMap<>();
+        HashMap<String, Double> ngramDist= new HashMap<>();
         int counter = 0;
         HashMap<String, HashMap> documentVectors = new HashMap<>();
         HashSet<String> languages = new HashSet<>();
         for (File file : domainFiles) {
-            HashMap<String, Integer> docNgramDist = new HashMap<>();
+            HashMap<String, Double> docNgramDist = new HashMap<>();
             try {
                 docNgramDist = DocumentTools.getDocumentBigramFDistribution(file);
             } catch (IOException ex) {
@@ -57,16 +57,16 @@ public class DocumentRepresentationConstructor {
             counter++;
             if(counter % 500 == 0) System.out.println("Documents processed: " + counter);
             for (String ngram : docNgramDist.keySet()) {
-                int ngramCount = ngramDist.containsKey(ngram) ? ngramDist.get(ngram) : 0;
+                double ngramCount = ngramDist.containsKey(ngram) ? ngramDist.get(ngram) : 0.0;
                 ngramDist.put(ngram, ngramCount + docNgramDist.get(ngram));
             }
         }
         
         System.out.println("Unique ngrams: " + ngramDist.size());
-        List<Entry<String,Integer>> ngrams = new ArrayList<>(ngramDist.entrySet());
-        Collections.sort(ngrams, new Comparator<Entry<String,Integer>>() {
+        List<Entry<String,Double>> ngrams = new ArrayList<>(ngramDist.entrySet());
+        Collections.sort(ngrams, new Comparator<Entry<String,Double>>() {
             @Override
-            public int compare(Entry<String,Integer> t1, Entry<String,Integer> t2) {
+            public int compare(Entry<String,Double> t1, Entry<String,Double> t2) {
                 return (t2.getValue()).compareTo(t1.getValue());
             }
         });
@@ -102,7 +102,7 @@ public class DocumentRepresentationConstructor {
         
         counter = 0;
         for (File file : langFiles) {
-            HashMap<String, Integer> docNgramDist = new HashMap<>();
+            HashMap<String, Double> docNgramDist = new HashMap<>();
             try {
                 docNgramDist = DocumentTools.getDocumentBigramFDistribution(file);
             } catch (IOException ex) {

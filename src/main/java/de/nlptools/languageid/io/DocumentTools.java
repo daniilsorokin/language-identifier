@@ -34,14 +34,14 @@ public class DocumentTools {
      * its frequency in the given document 
      * @throws IOException If the content of the file can't be read
      */
-    public static HashMap<String, Integer> getDocumentBigramFDistribution(File file) throws IOException {
+    public static HashMap<String, Double> getDocumentBigramFDistribution(File file) throws IOException {
         FDistribution bigramDist = new FDistribution();
         String content = new String(Files.readAllBytes(file.toPath()), ENCODING);
         char previousChar = content.charAt(0);
         for (int i = 1; i < content.length(); i++) {
             char currentChar = content.charAt(i);
             String bigram = new String(new char[]{ previousChar, currentChar });
-            bigramDist.update(bigram, 1);
+            bigramDist.update(bigram, 1.0);
 //            int bigramCount = bigramDist.containsKey(bigram) ? bigramDist.get(bigram) : 0;
 //            bigramDist.put(bigram, bigramCount + 1);
             previousChar = currentChar;
