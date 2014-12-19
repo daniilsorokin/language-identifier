@@ -1,6 +1,5 @@
-package de.nlptools.languageid.io;
+package de.nlptools.languageid.tools;
 
-import de.nlptools.languageid.FDistribution;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;

@@ -1,4 +1,4 @@
-package de.nlptools.languageid;
+package de.nlptools.languageid.tools;
 
 import java.util.ArrayList;
 import java.util.Collections;

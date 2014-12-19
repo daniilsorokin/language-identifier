@@ -1,6 +1,6 @@
 package de.nlptools.languageid;
 
-import de.nlptools.languageid.NearestPrototypeClassifier;
+import de.nlptools.languageid.classifiers.NearestPrototypeClassifier;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

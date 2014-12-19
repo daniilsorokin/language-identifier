@@ -1,6 +1,7 @@
-package de.nlptools.languageid;
+package de.nlptools.languageid.classifiers;
 
-import de.nlptools.languageid.io.DocumentTools;
+import de.nlptools.languageid.tools.FDistribution;
+import de.nlptools.languageid.tools.DocumentTools;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
