@@ -11,7 +11,7 @@ import java.util.logging.Logger;
 
 /**
  *
- * @author dsorokin
+ * @author Daniil Sorokin <daniil.sorokin@uni-tuebingen.de>
  */
 public class NearestPrototypeClassifier {
     
@@ -36,6 +36,7 @@ public class NearestPrototypeClassifier {
         System.out.println("Accuracy: " + accuracy);
     }
     
+    
     public static double cosine(double[] a, double[] b) {
         if(a.length != b.length) throw new RuntimeException();
         double amagn = 0.0, bmagn = 0.0, abproduct = 0.0;
@@ -58,6 +59,10 @@ public class NearestPrototypeClassifier {
     public NearestPrototypeClassifier() {
     }
     
+    /**
+     * 
+     * @param documents 
+     */
     public void build(File[] documents) {
         FDistribution bigramDist = new FDistribution();
         FDistribution docsPerLanguage = new FDistribution();
@@ -96,6 +101,11 @@ public class NearestPrototypeClassifier {
         }
     }
     
+    /**
+     * 
+     * @param document
+     * @return 
+     */
     public String predict(File document) {
         try {
             HashMap<String, Double> docNgramDist = DocumentTools.getDocumentBigramFDistribution(document);
