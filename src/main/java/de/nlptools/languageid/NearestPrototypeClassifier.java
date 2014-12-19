@@ -126,7 +126,7 @@ public class NearestPrototypeClassifier {
             }
             return predicted;
         } catch (IOException ex) {
-            Logger.getLogger(DocumentRepresentationConstructor.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(NearestPrototypeClassifier.class.getName()).log(Level.SEVERE, null, ex);
         }
         return defaultLang;
     }

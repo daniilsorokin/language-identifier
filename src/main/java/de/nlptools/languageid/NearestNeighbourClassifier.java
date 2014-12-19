@@ -3,12 +3,7 @@ package de.nlptools.languageid;
 import de.nlptools.languageid.io.DocumentTools;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -34,7 +29,7 @@ public class NearestNeighbourClassifier {
             try {
                 docNgramDist = DocumentTools.getDocumentBigramFDistribution(file);
             } catch (IOException ex) {
-                Logger.getLogger(DocumentRepresentationConstructor.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(NearestNeighbourClassifier.class.getName()).log(Level.SEVERE, null, ex);
             }
             String lang = DocumentTools.getDocumentLanguageFromFileName(file);
             docsPerLanguage.update(lang, 1.0);
@@ -100,7 +95,7 @@ public class NearestNeighbourClassifier {
             try {
                 docNgramDist = DocumentTools.getDocumentBigramFDistribution(file);
             } catch (IOException ex) {
-                Logger.getLogger(DocumentRepresentationConstructor.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(NearestNeighbourClassifier.class.getName()).log(Level.SEVERE, null, ex);
             }
             documentVectors.put(file.getName(),docNgramDist);
             counter++;
