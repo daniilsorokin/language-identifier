@@ -7,10 +7,10 @@ import de.bwaldvogel.liblinear.Model;
 import de.bwaldvogel.liblinear.Parameter;
 import de.bwaldvogel.liblinear.Problem;
 import de.bwaldvogel.liblinear.SolverType;
+import de.nlptools.languageid.io.Dataset;
+import de.nlptools.languageid.io.DocumentReader;
 import de.nlptools.languageid.tools.FDistribution;
 import de.nlptools.languageid.tools.DocumentTools;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,7 +22,7 @@ import java.util.logging.Logger;
  *
  * @author Daniil Sorokin <daniil.sorokin@uni-tuebingen.de>
 */
-public class LiblinearClassifier {
+public class LiblinearClassifier implements IClassifier{
     
     public static void main(String[] args) {
         try {
@@ -34,58 +34,49 @@ public class LiblinearClassifier {
                         + "\n Please check that the liblinear-1.94.jar is in the classpath.");
             return;
         } 
-        
-        
         String dir = "/home/dsorokin/Downloads/ijcnlp2011-langid/";
-        File[] domainFiles = new File(dir + "wikiraw/domain/").listFiles();
+        Dataset train = DocumentReader.readDatasetFromFolder(dir + "wikiraw/domain/");
 
-        LiblinearClassifier classifier = new LiblinearClassifier();
+        LiblinearClassifier classifier = new LiblinearClassifier(3000);
         System.out.println("Building the classifier.");
-        classifier.build(domainFiles);
+        classifier.build(train.getDocuments(), train.getLabels());
 
-        File[] langFiles = new File(dir + "wikiraw/lang/").listFiles();
         System.out.println("Classifying lang documents.");
-        int correctlyClassified = 0;
-        int numberOfDocuments = langFiles.length;
-        for (File file : langFiles) {
-            String goldLang = DocumentTools.getDocumentLanguageFromFileName(file);
-            String predicted = classifier.predict(file);
-            if (predicted.equals(goldLang)) correctlyClassified++;
-        }
-        double accuracy = (double) correctlyClassified / (double) numberOfDocuments;
+        Dataset test = DocumentReader.readDatasetFromFolder(dir + "wikiraw/lang/");
+        System.out.println("Classifying lang documents.");
+        EvaluationResult results = classifier.evaluate(test.getDocuments(), test.getLabels());
+        double accuracy = results.getAccuracy();
         System.out.println("Accuracy: " + accuracy);
-
     }
 
-    private int featureVectorSize = 3000;
+    private int featureVectorSize;
     private String[] selectedBigrams;
-    private String defaultLang = "en";
     
     private Model model;
     private ArrayList<String> languageIndex;
 
-    public LiblinearClassifier() {
+    public LiblinearClassifier(int numBiGrams) {
+        this.model = null;
+        this.languageIndex = null;
+        this.featureVectorSize = numBiGrams;
+        this.selectedBigrams = null;
     }
     
     
-    public void build(File[] documents){
+    @Override
+    public void build(String[] documents, String[] labels) {
         FDistribution bigramDist = new FDistribution();
 
-        HashMap<String, HashMap<String, Double>> documentVectors = new HashMap<>();
+        ArrayList<HashMap<String, Double>> documentVectors = new ArrayList<>(documents.length);
         HashSet<String> languages = new HashSet<>();
-        for (File file : documents) {
-            try {
+        for (int i = 0; i < documents.length; i++) {
+                String document = documents[i];
                 HashMap<String, Double> docNgramDist = 
-                        DocumentTools.getDocumentBigramFDistribution(file);
-                String lang = 
-                        DocumentTools.getDocumentLanguageFromFileName(file);
-                documentVectors.put(file.getName(),docNgramDist);
+                        DocumentTools.getDocumentBigramFDistribution(document);
+                String lang = labels[i];
+                documentVectors.add(docNgramDist);
                 languages.add(lang);
                 bigramDist.updateAll(docNgramDist);
-            } catch (IOException ex) {
-                Logger.getLogger(LiblinearClassifier.class.getName())
-                        .log(Level.SEVERE, null, ex);
-            }
         }
         
         List<String> bigrams = bigramDist.getSortedKeys();
@@ -100,10 +91,10 @@ public class LiblinearClassifier {
         problem.x = new Feature[documents.length][];
         
         for (int i = 0; i < documents.length; i++) {
-            String lang = DocumentTools.getDocumentLanguageFromFileName(documents[i]);
+            String lang = labels[i];
             int langId = languageIndex.indexOf(lang);
             problem.y[i] = langId;
-            HashMap<String, Double> docNgramDist = documentVectors.get(documents[i].getName());
+            HashMap<String, Double> docNgramDist = documentVectors.get(i);
             List<Feature> vector = new ArrayList<>();
             for (int j = 0; j < featureVectorSize; j++) {
                 String ngram = selectedBigrams[j];
@@ -121,23 +112,33 @@ public class LiblinearClassifier {
         model = Linear.train(problem, parameter);
     }
     
-    public String predict(File document){
-        try {
-            HashMap<String, Double> docNgramDist = DocumentTools.getDocumentBigramFDistribution(document);
-            List<Feature> vector = new ArrayList<>();
-            for (int j = 0; j < featureVectorSize; j++) {
-                String bigram = selectedBigrams[j];
-                Double value = docNgramDist.get(bigram);
-                if(value != null) vector.add(new FeatureNode(j + 1, value));
-            }
-            Feature[] liblinearVector = vector.toArray(new Feature[vector.size()]);
-            Double prediction = Linear.predict(model, liblinearVector);
-            String predictedLanguage = languageIndex.get(prediction.intValue());
-            return predictedLanguage;
-        } catch (IOException ex) {
-            Logger.getLogger(LiblinearClassifier.class.getName()).log(Level.SEVERE, null, ex);
+    @Override
+    public String predict(String document) {
+        HashMap<String, Double> docNgramDist = DocumentTools.getDocumentBigramFDistribution(document);
+        List<Feature> vector = new ArrayList<>();
+        for (int j = 0; j < featureVectorSize; j++) {
+            String bigram = selectedBigrams[j];
+            Double value = docNgramDist.get(bigram);
+            if(value != null) vector.add(new FeatureNode(j + 1, value));
         }
-        return defaultLang;
+        Feature[] liblinearVector = vector.toArray(new Feature[vector.size()]);
+        Double prediction = Linear.predict(model, liblinearVector);
+        String predictedLanguage = languageIndex.get(prediction.intValue());
+        return predictedLanguage;
+    }
+    
+    @Override
+    public EvaluationResult evaluate(String[] testDocuments, String[] goldLabels){
+        int correctlyClassified = 0;
+        int numberOfDocuments = testDocuments.length;
+        for (int i = 0; i < testDocuments.length; i++) {
+            String document = testDocuments[i];
+            String goldLang = goldLabels[i];
+            String predicted = this.predict(document);
+            if (predicted.equals(goldLang)) correctlyClassified++;
+        }
+        double accuracy = (double) correctlyClassified / (double) numberOfDocuments;
+        return new EvaluationResult(accuracy, 0.0, 0.0, 0.0);
     }
     
 }

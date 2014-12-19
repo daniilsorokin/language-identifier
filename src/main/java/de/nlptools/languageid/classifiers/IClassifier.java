@@ -7,6 +7,7 @@ package de.nlptools.languageid.classifiers;
  */
 public interface IClassifier {
     
-    public void build(String[] documents);
+    public void build(String[] documents, String[] labels);
     public String predict(String document);
+    public EvaluationResult evaluate(String[] testDocuments, String[] goldLabels);
 }
