@@ -23,4 +23,8 @@ public class Dataset {
     public String[] getLabels() {
         return labels;
     }
+    
+    public boolean hasLabels(){
+        return labels == null || labels.length == 0;
+    }
 }

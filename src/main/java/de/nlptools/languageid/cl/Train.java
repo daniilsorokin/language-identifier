@@ -23,9 +23,6 @@ public class Train {
             System.exit(1);
         }
 
-        String trainingSet = parameters.get(Train.TRAIN_SET);
-        Dataset train = DocumentReader.readDatasetFromFolder(trainingSet);
-        
         IClassifier classifier = null;
         String classifierType = parameters.containsKey(Train.CLASSIFIER) ?
                 parameters.get(Train.CLASSIFIER) : DEFAULT_CLASSIFIER;
@@ -56,6 +53,11 @@ public class Train {
             Train.printHelp();
             System.exit(1);
         }
+        
+        System.out.println("Reading the data.");
+        String trainingSet = parameters.get(Train.TRAIN_SET);
+        Dataset train = DocumentReader.readDatasetFromFolder(trainingSet);
+        
         
         int numFeatures = 10000;
         if(parameters.containsKey(Train.NUM_FEATURES))

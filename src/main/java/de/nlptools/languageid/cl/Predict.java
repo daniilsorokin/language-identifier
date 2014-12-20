@@ -1,12 +1,14 @@
 package de.nlptools.languageid.cl;
 
 import static de.nlptools.languageid.cl.Train.readClArgs;
+import de.nlptools.languageid.classifiers.EvaluationResult;
 import de.nlptools.languageid.classifiers.IClassifier;
 import de.nlptools.languageid.classifiers.LiblinearClassifier;
 import de.nlptools.languageid.classifiers.NearestPrototypeClassifier;
 import de.nlptools.languageid.io.Dataset;
 import de.nlptools.languageid.io.DocumentReader;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -71,12 +73,29 @@ public class Predict {
         System.out.println("Loading the model.");
         classifier.loadModel(modelFile);
         System.out.println("Processing the documents.");
-        Dataset test = DocumentReader.readDatasetFromFolder(testSet);
-
-
-//        EvaluationResult results = classifier.evaluate(test.getDocuments(), test.getLabels());
-//        double accuracy = results.getAccuracy();
-//        System.out.println("Accuracy: " + accuracy);
+        File testFile = new File(testSet);
+        if (testFile.isFile()) {
+            try {
+                String content = DocumentReader.readContentFromFile(testFile);
+                String prediction = classifier.predict(content);
+                System.out.println("Document language: " + prediction);
+            } catch (IOException ex) {
+                Logger.getLogger(Predict.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else if (testFile.isDirectory()) {
+            Dataset test = DocumentReader.readDatasetFromFolder(testSet);
+            if (test.hasLabels()){
+                EvaluationResult results = classifier.evaluate(test.getDocuments(), test.getLabels());
+                double accuracy = results.getAccuracy();
+                System.out.println("Accuracy: " + accuracy);
+            } else {
+                System.out.println("Document languages:");
+                for (String document : test.getDocuments()) {
+                    String prediction = classifier.predict(document);
+                    System.out.println(prediction);
+                }
+            }
+        }
     }
     
     public static final String MODEL_FILE = "modelFile";
