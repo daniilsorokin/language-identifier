@@ -29,7 +29,8 @@ public class DocumentReader {
      */
     public static String readContentFromFile(File file) throws IOException {
         String content = new String(Files.readAllBytes(file.toPath()), ENCODING);
-        content = content.replace('\n', ' ');
+        content = content.replace('\n', ' ')
+                        .replace('\t', ' ');
         return content;
     }
     

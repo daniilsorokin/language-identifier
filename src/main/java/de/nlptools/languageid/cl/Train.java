@@ -55,7 +55,7 @@ public class Train {
         }
         
         System.out.println("Reading the data.");
-        String trainingSet = parameters.get(Train.TRAIN_SET);
+        String trainingSet = parameters.get(Train.DOCS_SET);
         Dataset train = DocumentReader.readDatasetFromFolder(trainingSet);
         
         
@@ -67,7 +67,7 @@ public class Train {
         classifier.build(train.getDocuments(), train.getLabels(), numFeatures);
 
         String modelFile = parameters.containsKey(Train.MODEL_FILE) ?
-                parameters.get(Train.MODEL_FILE) : trainingSet + ".model";
+                parameters.get(Train.MODEL_FILE) : classifierType + ".model";
 
         System.out.println("Saving the model.");
         classifier.saveModel(modelFile);
@@ -82,7 +82,7 @@ public class Train {
     public static final String CLASSIFIER = "classifier";
     public static final String C_PARAMETER = "cParameter";
     public static final String MODEL_FILE = "modelFile";
-    public static final String TRAIN_SET = "trainSet";
+    public static final String DOCS_SET = "documentsSet";
     
     public static HashMap<String, String> readClArgs(String[] args){
         if (args.length == 0) return null;
@@ -111,7 +111,7 @@ public class Train {
             dash = args[i].charAt(0);
         }        
         if (args.length <= i) return null;
-        parameters.put(TRAIN_SET, args[i]);
+        parameters.put(DOCS_SET, args[i]);
         if (args.length > i + 1) parameters.put(MODEL_FILE, args[i+1]);
         return parameters;
     }

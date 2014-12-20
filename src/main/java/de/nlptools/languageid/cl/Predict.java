@@ -29,8 +29,8 @@ public class Predict {
             System.exit(1);
         }
         
-        String modelFile = parameters.get(Predict.MODEL_FILE);
-        String testSet = parameters.get(Predict.TEST_SET);
+        String modelFile = parameters.get(Train.MODEL_FILE);
+        String testSet = parameters.get(Train.DOCS_SET);
         
         String classifierType = Train.DEFAULT_CLASSIFIER;
         try(BufferedReader in = new BufferedReader
@@ -84,7 +84,8 @@ public class Predict {
             }
         } else if (testFile.isDirectory()) {
             Dataset test = DocumentReader.readDatasetFromFolder(testSet);
-            if (test.hasLabels()){
+//            if (test.hasLabels()){
+            if (true){
                 EvaluationResult results = classifier.evaluate(test.getDocuments(), test.getLabels());
                 double accuracy = results.getAccuracy();
                 System.out.println("Accuracy: " + accuracy);
@@ -98,11 +99,8 @@ public class Predict {
         }
     }
     
-    public static final String MODEL_FILE = "modelFile";
-    public static final String TEST_SET = "testSet";
-    
     public static void printHelp(){
-        System.out.printf("Usage: de.nlptools.languageid.cl.Predict modelFile testSet %n"
+        System.out.printf("Usage: de.nlptools.languageid.cl.Predict documentsSet modelFile %n"
                 + "modelFile : name of the model file. %n"
                 + "documentSet : a folder containing the documents or a meta file %n"
                 + "         with a list of file names or single file name. %n"
