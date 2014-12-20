@@ -15,7 +15,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>de.nlptools.languageid.classifiers.NearestPrototypeClassifier</mainClass>
+                            <mainClass>de.nlptools.languageid.cl.Train</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
