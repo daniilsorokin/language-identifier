@@ -23,7 +23,7 @@ public class TrainTest {
         System.out.println("Test readClArgs(), Run 1");
         String[] args = new String[]{"train.in", "model.out"};
         HashMap<String, String> expResult = new HashMap<>();
-        expResult.put(Train.TRAIN_SET, "train.in");
+        expResult.put(Train.DOCS_SET, "train.in");
         expResult.put(Train.MODEL_FILE, "model.out");
         HashMap<String, String> result = Train.readClArgs(args);
         assertEquals(expResult, result);
@@ -39,7 +39,7 @@ public class TrainTest {
         HashMap<String, String> expResult = new HashMap<>();
         expResult.put(Train.CLASSIFIER, "Liblinear");
         expResult.put(Train.C_PARAMETER, "5");
-        expResult.put(Train.TRAIN_SET, "train.in");
+        expResult.put(Train.DOCS_SET, "train.in");
         HashMap<String, String> result = Train.readClArgs(args);
         assertEquals(expResult, result);
     }    
