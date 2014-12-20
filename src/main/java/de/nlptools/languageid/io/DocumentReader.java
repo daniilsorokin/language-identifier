@@ -70,41 +70,35 @@ public class DocumentReader {
         String[] labels = labelsList.toArray(new String[labelsList.size()]);
         return new Dataset(documents, labels);
     }
-    
-    
-    public static void loadMetaFile(String file) throws IOException {
-        try (BufferedReader in = new BufferedReader(
-                new InputStreamReader(
-                new FileInputStream(file), "UTF-8"))){
-            TreeMap<String,Set<String>> fileDictionary = new TreeMap<>();
-            String line;
-            while((line = in.readLine()) != null){
-                String[] columns = line.trim().split("\t");
-                if(fileDictionary.containsKey(columns[2])) {
-                    fileDictionary.get(columns[2]).add(columns[0]);
-                } else {
-                    HashSet<String> tmp = new HashSet<>();
-                    tmp.add(columns[0]);
-                    fileDictionary.put(columns[2], tmp);
-                }
-            }
-        }
-    }
 
-    public static Map<String, String> loadListFromMetaFile(String file) {
-        TreeMap<String,String> fileDictionary = new TreeMap<>();
+    public static Dataset readDatasetFromMetaFile(String metaFileName) {
+        File metaFile = new File(metaFileName);
+        if (!metaFile.isFile()) return null;
+        ArrayList<String> filesList = new ArrayList<>();        
+        ArrayList<String> labelsList = new ArrayList<>();
         try (BufferedReader in = new BufferedReader(
                 new InputStreamReader(
-                new FileInputStream(file), "UTF-8"))){
+                new FileInputStream(metaFile), "UTF-8"))){
             String line;
             while((line = in.readLine()) != null){
-                String[] columns = line.trim().split("\t");
-                fileDictionary.put(columns[0], columns[2]);
+                String[] columns = line.trim().split(",");
+                filesList.add(columns[0]);
+                labelsList.add(columns[1]);
             }
         } catch (IOException ex) {
             Logger.getLogger(DocumentReader.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return fileDictionary;
+        ArrayList<String> documentsList = new ArrayList<>();
+        for (String file : filesList) {
+            try {
+                String content = DocumentReader.readContentFromFile(new File(file));
+                documentsList.add(content);
+            } catch (IOException ex) {
+                Logger.getLogger(DocumentReader.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }        
+        String[] documents = documentsList.toArray(new String[documentsList.size()]);
+        String[] labels = labelsList.toArray(new String[labelsList.size()]);
+        return new Dataset(documents, labels);
     }    
-    
 }
