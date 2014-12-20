@@ -29,6 +29,7 @@ public class DocumentReader {
      */
     public static String readContentFromFile(File file) throws IOException {
         String content = new String(Files.readAllBytes(file.toPath()), ENCODING);
+        content = content.replace('\n', ' ');
         return content;
     }
     
@@ -41,7 +42,12 @@ public class DocumentReader {
      * @return an ISO language code
      */
     public static String getDocumentLanguageFromFileName(String fileName){
-        return fileName.substring(0, fileName.indexOf('_'));
+        int index = fileName.indexOf('_');
+        if (index != -1 && index < 5){
+            return fileName.substring(0, index);
+        } else {
+            return null;
+        }
     }
     
     
@@ -61,13 +67,15 @@ public class DocumentReader {
                 String content = DocumentReader.readContentFromFile(file);
                 documentsList.add(content);
                 String lang = DocumentReader.getDocumentLanguageFromFileName(file.getName());
-                labelsList.add(lang);
+                if (lang != null) labelsList.add(lang);
             } catch (IOException ex) {
                 Logger.getLogger(DocumentReader.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         String[] documents = documentsList.toArray(new String[documentsList.size()]);
-        String[] labels = labelsList.toArray(new String[labelsList.size()]);
+        String[] labels = {};
+        if ( labelsList.size() == documentsList.size() )
+            labels = labelsList.toArray(new String[labelsList.size()]);
         return new Dataset(documents, labels);
     }
 
@@ -83,7 +91,8 @@ public class DocumentReader {
             while((line = in.readLine()) != null){
                 String[] columns = line.trim().split(",");
                 filesList.add(columns[0]);
-                labelsList.add(columns[1]);
+                if (columns.length > 1)
+                    labelsList.add(columns[1]);
             }
         } catch (IOException ex) {
             Logger.getLogger(DocumentReader.class.getName()).log(Level.SEVERE, null, ex);
@@ -98,7 +107,9 @@ public class DocumentReader {
             }
         }        
         String[] documents = documentsList.toArray(new String[documentsList.size()]);
-        String[] labels = labelsList.toArray(new String[labelsList.size()]);
+        String[] labels = {};
+        if ( labelsList.size() == documentsList.size() )
+            labels = labelsList.toArray(new String[labelsList.size()]);
         return new Dataset(documents, labels);
     }    
 }
