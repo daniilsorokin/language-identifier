@@ -5,23 +5,34 @@ import de.nlptools.languageid.io.DocumentReader;
 import de.nlptools.languageid.tools.FDistribution;
 import de.nlptools.languageid.tools.DocumentTools;
 import de.nlptools.languageid.tools.MathTools;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author Daniil Sorokin <daniil.sorokin@uni-tuebingen.de>
  */
-public class NearestPrototypeClassifier implements IClassifier{
-    
+public class NearestPrototypeClassifier implements IClassifier {
+        
     public static void main(String[] args) {
         String dir = "/home/dsorokin/Downloads/ijcnlp2011-langid/";
         Dataset train = DocumentReader.readDatasetFromFolder(dir + "wikiraw/domain/");
         
-        NearestPrototypeClassifier classifier = new NearestPrototypeClassifier(10000);
+        NearestPrototypeClassifier classifier = new NearestPrototypeClassifier();
         System.out.println("Building the classifier.");
-        classifier.build(train.getDocuments(), train.getLabels());
+        classifier.build(train.getDocuments(), train.getLabels(), 10000);
 
         Dataset test = DocumentReader.readDatasetFromFolder(dir + "wikiraw/lang/");
         System.out.println("Classifying lang documents.");
@@ -29,21 +40,21 @@ public class NearestPrototypeClassifier implements IClassifier{
         double accuracy = results.getAccuracy();
         System.out.println("Accuracy: " + accuracy);
     }
-
-    private HashMap<String, double[]> languagePrototypes;
-    private int featureVectorSize;
-    private String[] selectedBigrams;
-    private String defaultLang;
     
-    public NearestPrototypeClassifier(int numBiGrams) {
+    public static final String ENCODING = "utf-8";
+    public static final String MODEL_NAME = "LanguagePrototypeClassifierModel";
+    private static final String DEFAULT_LANG = "en";
+    private HashMap<String, double[]> languagePrototypes;
+    private String[] selectedBigrams;
+    
+    
+    public NearestPrototypeClassifier() {
         this.languagePrototypes = null;
         this.selectedBigrams = null;
-        this.featureVectorSize = numBiGrams;
-        this.defaultLang = "en";
     }
     
     @Override
-    public void build(String[] documents, String[] labels) {
+    public void build(String[] documents, String[] labels, int featureVectorSize) {
         FDistribution bigramDist = new FDistribution();
         FDistribution docsPerLanguage = new FDistribution();
         HashMap<String, FDistribution> languageFDistributions = new HashMap<>();
@@ -83,14 +94,18 @@ public class NearestPrototypeClassifier implements IClassifier{
      */
     @Override
     public String predict(String document) {
+        if (languagePrototypes == null) {
+            Logger.getLogger(NearestPrototypeClassifier.class.getName()).log(Level.SEVERE, "No model found.");
+            return DEFAULT_LANG;
+        }
         HashMap<String, Double> docNgramDist = DocumentTools.getDocumentBigramFDistribution(document);
-        double[] documentVector = new double[featureVectorSize];
-        for (int i = 0; i < featureVectorSize; i++) {
+        double[] documentVector = new double[selectedBigrams.length];
+        for (int i = 0; i < selectedBigrams.length; i++) {
             String bigram = selectedBigrams[i];
             Double value = docNgramDist.containsKey(bigram) ? docNgramDist.get(bigram) : 0.0;
             documentVector[i] = value;
         }
-        String predicted = defaultLang;
+        String predicted = DEFAULT_LANG;
         double maxCosine = -2;
         for (Map.Entry<String, double[]> entry : languagePrototypes.entrySet()) {
             double cosine = MathTools.cosine(documentVector, entry.getValue());
@@ -115,4 +130,53 @@ public class NearestPrototypeClassifier implements IClassifier{
         double accuracy = (double) correctlyClassified / (double) numberOfDocuments;
         return new EvaluationResult(accuracy, 0.0, 0.0, 0.0);
     } 
+    
+
+    @Override
+    public void saveModel(String fileName){
+        try(BufferedWriter out = new BufferedWriter
+            (new OutputStreamWriter(new FileOutputStream(fileName), ENCODING))) {
+            out.write(NearestPrototypeClassifier.MODEL_NAME);
+            out.newLine();
+            for (String selectedBigram : selectedBigrams) {
+                out.write(selectedBigram + ",");
+            }
+            out.newLine();
+            for (Map.Entry<String, double[]> languageEntry : languagePrototypes.entrySet()) {
+                out.write(languageEntry.getKey());
+                for (double value : languageEntry.getValue()) {
+                    out.write("," + value);
+                }
+                out.newLine();
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(NearestPrototypeClassifier.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    @Override
+    public void loadModel(String fileName){
+        try(BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(fileName), ENCODING))){
+            in.readLine(); // Skip the model name
+            String line = in.readLine().trim();
+            selectedBigrams = line.split(",");
+            languagePrototypes = new HashMap<>();
+            while ((line = in.readLine()) != null){
+                line = line.trim();
+                String[] values = line.split(",");
+                if (values.length == selectedBigrams.length){
+                    double[] languageVector = new double[selectedBigrams.length];
+                    String lang = values[0];
+                    for (int i = 1; i < selectedBigrams.length; i++) {
+                        String ngram = selectedBigrams[i];
+                        Double value = Double.parseDouble(values[i]);
+                        languageVector[i] = value;
+                    }
+                    languagePrototypes.put(lang, languageVector);
+                }
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(NearestPrototypeClassifier.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 }

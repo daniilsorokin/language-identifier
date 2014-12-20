@@ -11,6 +11,8 @@ import de.nlptools.languageid.io.Dataset;
 import de.nlptools.languageid.io.DocumentReader;
 import de.nlptools.languageid.tools.FDistribution;
 import de.nlptools.languageid.tools.DocumentTools;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,9 +39,10 @@ public class LiblinearClassifier implements IClassifier{
         String dir = "/home/dsorokin/Downloads/ijcnlp2011-langid/";
         Dataset train = DocumentReader.readDatasetFromFolder(dir + "wikiraw/domain/");
 
-        LiblinearClassifier classifier = new LiblinearClassifier(3000);
+        LiblinearClassifier classifier = new LiblinearClassifier();
+        classifier.setC(128.0);
         System.out.println("Building the classifier.");
-        classifier.build(train.getDocuments(), train.getLabels());
+        classifier.build(train.getDocuments(), train.getLabels(), 3000);
 
         System.out.println("Classifying lang documents.");
         Dataset test = DocumentReader.readDatasetFromFolder(dir + "wikiraw/lang/");
@@ -49,22 +52,24 @@ public class LiblinearClassifier implements IClassifier{
         System.out.println("Accuracy: " + accuracy);
     }
 
-    private int featureVectorSize;
     private String[] selectedBigrams;
-    
     private Model model;
     private ArrayList<String> languageIndex;
+    private double c;
 
-    public LiblinearClassifier(int numBiGrams) {
+    public LiblinearClassifier() {
         this.model = null;
         this.languageIndex = null;
-        this.featureVectorSize = numBiGrams;
         this.selectedBigrams = null;
+        this.c = 1.0;
     }
     
+    public void setC(double c){
+        this.c = c;
+    }
     
     @Override
-    public void build(String[] documents, String[] labels) {
+    public void build(String[] documents, String[] labels, int featureVectorSize) {
         FDistribution bigramDist = new FDistribution();
 
         ArrayList<HashMap<String, Double>> documentVectors = new ArrayList<>(documents.length);
@@ -78,7 +83,6 @@ public class LiblinearClassifier implements IClassifier{
                 languages.add(lang);
                 bigramDist.updateAll(docNgramDist);
         }
-        
         List<String> bigrams = bigramDist.getSortedKeys();
         selectedBigrams = bigrams.subList(0, featureVectorSize)
                 .toArray(new String[featureVectorSize]);
@@ -103,12 +107,8 @@ public class LiblinearClassifier implements IClassifier{
             }
             problem.x[i] = vector.toArray(new Feature[vector.size()]);
         }
-        
         SolverType solver = SolverType.L2R_L2LOSS_SVC_DUAL;
-        double cost = 128.0;
-        double eps = 0.1;
-        
-        Parameter parameter = new Parameter(solver, cost, eps);
+        Parameter parameter = new Parameter(solver, this.c, 0.1);
         model = Linear.train(problem, parameter);
     }
     
@@ -116,7 +116,7 @@ public class LiblinearClassifier implements IClassifier{
     public String predict(String document) {
         HashMap<String, Double> docNgramDist = DocumentTools.getDocumentBigramFDistribution(document);
         List<Feature> vector = new ArrayList<>();
-        for (int j = 0; j < featureVectorSize; j++) {
+        for (int j = 0; j < selectedBigrams.length; j++) {
             String bigram = selectedBigrams[j];
             Double value = docNgramDist.get(bigram);
             if(value != null) vector.add(new FeatureNode(j + 1, value));
@@ -141,4 +141,21 @@ public class LiblinearClassifier implements IClassifier{
         return new EvaluationResult(accuracy, 0.0, 0.0, 0.0);
     }
     
+    @Override
+    public void saveModel(String fileName){
+        try {
+            this.model.save(new File(fileName));
+        } catch (IOException ex) {
+            Logger.getLogger(LiblinearClassifier.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    @Override
+    public void loadModel(String fileName){
+        try {
+            this.model = Model.load(new File(fileName));
+        } catch (IOException ex) {
+            Logger.getLogger(LiblinearClassifier.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 }
