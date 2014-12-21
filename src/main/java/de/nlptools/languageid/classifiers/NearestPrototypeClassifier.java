@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,14 +28,14 @@ import java.util.logging.Logger;
 public class NearestPrototypeClassifier implements IClassifier {
         
     public static void main(String[] args) {
-        String dir = "/home/dsorokin/Downloads/ijcnlp2011-langid/";
-        Dataset train = DocumentReader.readDatasetFromFolder(dir + "wikiraw/domain/");
+        String dir = "C:\\Users\\Даня\\Downloads\\ijcnlp2011-langid\\ijcnlp2011-langid\\ijcnlp2011-langid\\";
+        Dataset train = DocumentReader.readDatasetFromFolder(dir + "wikiraw\\domain\\");
         
         NearestPrototypeClassifier classifier = new NearestPrototypeClassifier();
         System.out.println("Building the classifier.");
         classifier.build(train.getDocuments(), train.getLabels(), 10000);
 
-        Dataset test = DocumentReader.readDatasetFromFolder(dir + "wikiraw/lang/");
+        Dataset test = DocumentReader.readDatasetFromFolder(dir + "wikiraw\\lang\\");
         System.out.println("Classifying lang documents.");
         EvaluationResult results = classifier.evaluate(test.getDocuments(), test.getLabels());
         double accuracy = results.getAccuracy();
@@ -167,14 +168,13 @@ public class NearestPrototypeClassifier implements IClassifier {
                 if (values.length - 1 == selectedBigrams.length){
                     double[] languageVector = new double[selectedBigrams.length];
                     String lang = values[0];
-                    for (int i = 1; i < selectedBigrams.length; i++) {
-                        Double value = Double.parseDouble(values[i]);
+                    for (int i = 0; i < selectedBigrams.length; i++) {
+                        Double value = Double.parseDouble(values[i + 1]);
                         languageVector[i] = value;
                     }
                     languagePrototypes.put(lang, languageVector);
                 }
             }
-            System.out.println("The model is loaded. " + selectedBigrams.length + " " + languagePrototypes.size());
         } catch (IOException ex) {
             Logger.getLogger(NearestPrototypeClassifier.class.getName()).log(Level.SEVERE, null, ex);
         }
