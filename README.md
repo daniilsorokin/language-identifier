@@ -62,7 +62,7 @@ Liblinear classifier accuracy on the development set: 0.960
 Liblinear classifier accuracy on the test set:        0.783
 
 
-These numbers are comparable with results reported by Baldwin and Lui (2010) on the Wikipedia dataset.
+These numbers are comparable with the results reported by Baldwin and Lui (2010) on the Wikipedia dataset.
 
 
 ### References
