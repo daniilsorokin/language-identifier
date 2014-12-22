@@ -1,8 +1,9 @@
 package de.nlptools.languageid.classifiers;
 
 /**
- *
- * @author dsorokin
+ * The class is used to store results of a classifier evaluation.
+ * 
+ * @author Daniil Sorokin <daniil.sorokin@uni-tuebingen.de>
  */
 public class EvaluationResult {
     

@@ -1,68 +1,21 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package de.nlptools.languageid.classifiers;
 
-import de.nlptools.languageid.io.DocumentReader;
-import java.io.File;
 import java.io.IOException;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
  *
- * @author Даня
+ * @author Daniil Sorokin <daniil.sorokin@uni-tuebingen.de>
  */
 public class NearestPrototypeClassifierTest {
     
-    public NearestPrototypeClassifierTest() {
-    }
-    
     @BeforeClass
     public static void setUpClass() {
-    }
-    
-    @AfterClass
-    public static void tearDownClass() {
-    }
-    
-    @Before
-    public void setUp() {
-    }
-    
-    @After
-    public void tearDown() {
-    }
-
-
-    /**
-     * Test of build method, of class NearestPrototypeClassifier.
-     */
-    @Test
-    public void testBuild() {
-
-    }
-
-    /**
-     * Test of predict method, of class NearestPrototypeClassifier.
-     */
-    @Test
-    public void testPredict() {
-
-    }
-    
-    /**
-     * Test of saveModel method, of class NearestPrototypeClassifier.
-     */
-    @Test
-    public void testSaveModel() {
-
+        System.out.println("*** Test NearestPrototypeClassifier class ***");
     }
 
     /**
@@ -71,16 +24,30 @@ public class NearestPrototypeClassifierTest {
      * @throws java.io.IOException
      */
     @Test
-    public void testLoadModel() throws IOException {
-        System.out.println("loadModel");
-        String fileName = "NP.model";
-        NearestPrototypeClassifier classifier = new NearestPrototypeClassifier();
-        classifier.loadModel(fileName);
-        String testFile = "de_240125.txt";
-        String content = DocumentReader.readContentFromFile(new File(testFile));
-        String prediction = classifier.predict(content);
-        String expectedPrediction = "de";
-        assertEquals(prediction, expectedPrediction);
+    public void testSaveAndLoadModel() throws IOException {
+        System.out.println("Test saveModel() and loadModel() methods.");
+        String contentEn = "This is really a test document.";
+        String contentDe = "Das ist wirklich ein Dokument.";
+        String[] documents = new String[]{contentEn, contentEn, contentDe};
+        String[] langs = new String[]{"en", "en", "de"};        
+        String modelFileName = "test.model";
+        
+        NearestPrototypeClassifier classifier1 = new NearestPrototypeClassifier();
+        classifier1.build(documents, langs, 1000);
+        classifier1.saveModel(modelFileName);
+        
+        NearestPrototypeClassifier classifier2 = new NearestPrototypeClassifier();
+        classifier2.loadModel(modelFileName);
+        
+        String prediction1 = classifier2.predict(contentEn);        
+        String expectedPrediction1 = "en";
+        assertEquals(prediction1, expectedPrediction1);
+
+        String prediction2 = classifier2.predict(contentDe);        
+        String expectedPrediction2 = "de";
+        assertEquals(prediction2, expectedPrediction2);
+        
+        Files.delete(Paths.get(modelFileName));
     }
     
 }

@@ -21,7 +21,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
+ * This class implements a classifier for the language identification task based
+ * on the liblinear library. Liblinear is an implementation of a linear SVM 
+ * algorithm.
+ * 
  * @author Daniil Sorokin <daniil.sorokin@uni-tuebingen.de>
 */
 public class LiblinearClassifier implements IClassifier{
@@ -57,6 +60,10 @@ public class LiblinearClassifier implements IClassifier{
     private ArrayList<String> languageIndex;
     private double c;
 
+    /**
+     * Create new empty liblinear classifier for language detection in
+     * textual documents.
+     */
     public LiblinearClassifier() {
         this.model = null;
         this.languageIndex = null;
@@ -64,12 +71,24 @@ public class LiblinearClassifier implements IClassifier{
         this.c = 1.0;
     }
     
+    /**
+     * Sets the cost parameter for the SVM classification.
+     * 
+     * @param c cost parameter
+     */
     public void setC(double c){
         this.c = c;
     }
     
+    /**
+     * Builds a classifier on the provided training data.
+     * 
+     * @param documents a list of documents for training
+     * @param labels a list of gold language labels for the training documents
+     * @param bigramVectorSize amount of features to use for classification
+     */    
     @Override
-    public void build(String[] documents, String[] labels, int featureVectorSize) {
+    public void build(String[] documents, String[] labels, int bigramVectorSize) {
         FDistribution bigramDist = new FDistribution();
 
         ArrayList<HashMap<String, Double>> documentVectors = new ArrayList<>(documents.length);
@@ -84,13 +103,13 @@ public class LiblinearClassifier implements IClassifier{
                 bigramDist.updateAll(docNgramDist);
         }
         List<String> bigrams = bigramDist.getSortedKeys();
-        selectedBigrams = bigrams.subList(0, featureVectorSize)
-                .toArray(new String[featureVectorSize]);
+        selectedBigrams = bigrams.subList(0, bigramVectorSize)
+                .toArray(new String[bigramVectorSize]);
         
         languageIndex = new ArrayList<>(languages);
         Problem problem = new Problem();
         problem.l = documents.length;
-        problem.n = featureVectorSize;
+        problem.n = bigramVectorSize;
         problem.y = new double[documents.length];
         problem.x = new Feature[documents.length][];
         
@@ -100,7 +119,7 @@ public class LiblinearClassifier implements IClassifier{
             problem.y[i] = langId;
             HashMap<String, Double> docNgramDist = documentVectors.get(i);
             List<Feature> vector = new ArrayList<>();
-            for (int j = 0; j < featureVectorSize; j++) {
+            for (int j = 0; j < bigramVectorSize; j++) {
                 String ngram = selectedBigrams[j];
                 Double value = docNgramDist.get(ngram);
                 if(value != null) vector.add(new FeatureNode(j + 1, value));
@@ -112,6 +131,12 @@ public class LiblinearClassifier implements IClassifier{
         model = Linear.train(problem, parameter);
     }
     
+    /**
+     * Predicts the language for a given document.
+     * 
+     * @param document document to process
+     * @return predicted language
+     */    
     @Override
     public String predict(String document) {
         HashMap<String, Double> docNgramDist = DocumentTools.getDocumentBigramFDistribution(document);
@@ -127,6 +152,13 @@ public class LiblinearClassifier implements IClassifier{
         return predictedLanguage;
     }
     
+    /**
+     * Evaluates the classifier on the give test set. 
+     * 
+     * @param testDocuments list of the documents for testing
+     * @param goldLabels list of the gold labels
+     * @return the result of the evaluation
+     */
     @Override
     public EvaluationResult evaluate(String[] testDocuments, String[] goldLabels){
         int correctlyClassified = 0;
@@ -141,6 +173,11 @@ public class LiblinearClassifier implements IClassifier{
         return new EvaluationResult(accuracy, 0.0, 0.0, 0.0);
     }
     
+    /**
+     * Stores the classifier model in a file.
+     * 
+     * @param fileName the name of the file name to store the model
+     */    
     @Override
     public void saveModel(String fileName){
         try {
@@ -150,6 +187,11 @@ public class LiblinearClassifier implements IClassifier{
         }
     }
     
+    /**
+     * Loads a classifier model from file.
+     * 
+     * @param fileName the model file
+     */    
     @Override
     public void loadModel(String fileName){
         try {

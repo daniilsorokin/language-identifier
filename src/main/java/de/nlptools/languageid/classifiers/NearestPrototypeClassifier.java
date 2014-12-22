@@ -8,13 +8,10 @@ import de.nlptools.languageid.tools.MathTools;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,20 +19,27 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
+ * This class implements a simple nearest prototype classifier for the language
+ * identification tasks. It constructs language prototype vectors that contain 
+ * average bigram frequencies computed over the documents in the corresponding 
+ * language. For an unlabeled documents the classifier compares the document 
+ * vector to the language prototype vectors using the cosine similarity and 
+ * chooses the most similar language prototype.
+ * 
  * @author Daniil Sorokin <daniil.sorokin@uni-tuebingen.de>
  */
 public class NearestPrototypeClassifier implements IClassifier {
         
     public static void main(String[] args) {
-        String dir = "C:\\Users\\Даня\\Downloads\\ijcnlp2011-langid\\ijcnlp2011-langid\\ijcnlp2011-langid\\";
-        Dataset train = DocumentReader.readDatasetFromFolder(dir + "wikiraw\\domain\\");
+        String dir = "/home/dsorokin/Downloads/ijcnlp2011-langid/";
+//        Dataset train = DocumentReader.readDatasetFromMetaFile(dir + "metadata");
+        Dataset train = DocumentReader.readDatasetFromFolder(dir + "wikiraw/domain/");
         
         NearestPrototypeClassifier classifier = new NearestPrototypeClassifier();
         System.out.println("Building the classifier.");
-        classifier.build(train.getDocuments(), train.getLabels(), 10000);
+        classifier.build(train.getDocuments(), train.getLabels(), 3000);
 
-        Dataset test = DocumentReader.readDatasetFromFolder(dir + "wikiraw\\lang\\");
+        Dataset test = DocumentReader.readDatasetFromFolder(dir + "wikiraw/lang/");
         System.out.println("Classifying lang documents.");
         EvaluationResult results = classifier.evaluate(test.getDocuments(), test.getLabels());
         double accuracy = results.getAccuracy();
@@ -43,43 +47,67 @@ public class NearestPrototypeClassifier implements IClassifier {
     }
     
     public static final String ENCODING = "utf-8";
-    public static final String MODEL_NAME = "LanguagePrototypeClassifierModel";
+    public static final String MODEL_NAME = "LanguagePrototypeClassifierModel";    
     private static final String DEFAULT_LANG = "en";
+    
+
     private HashMap<String, double[]> languagePrototypes;
     private String[] selectedBigrams;
     
-    
+    /**
+     * Create new empty nearest prototype classifier for language detection in
+     * textual documents.
+     */
     public NearestPrototypeClassifier() {
         this.languagePrototypes = null;
         this.selectedBigrams = null;
     }
     
+    /**
+     * Builds a classifier on the provided training data.
+     * 
+     * @param documents a list of documents for training
+     * @param labels a list of gold language labels for the training documents
+     * @param bigramVectorSize amount of features to use for classification
+     */
     @Override
-    public void build(String[] documents, String[] labels, int featureVectorSize) {
+    public void build(String[] documents, String[] labels, int bigramVectorSize) {
         FDistribution bigramDist = new FDistribution();
         FDistribution docsPerLanguage = new FDistribution();
         HashMap<String, FDistribution> languageFDistributions = new HashMap<>();
         
+        /* Iterate over documents in the training set. */
         for (int i = 0; i < documents.length; i++) {
             String document = documents[i];
+            // Extract a frequency distribution over bigrams for each document
             HashMap<String, Double> docNgramDist =
                     DocumentTools.getDocumentBigramFDistribution(document);
             String lang = labels[i];
             docsPerLanguage.update(lang, 1.0);
+            // Add the frequencies to the vector of the corresponding language
             if (!languageFDistributions.containsKey(lang))
                 languageFDistributions.put(lang, new FDistribution());
             languageFDistributions.get(lang).updateAll(docNgramDist);
+            // Add the frequencies to the overall distribution
             bigramDist.updateAll(docNgramDist);
         }
         
+        /* Sort the overall bigram distribution by frequency and select the top N. */
         List<String> bigrams = bigramDist.getSortedKeys();
-        selectedBigrams = bigrams.subList(0, featureVectorSize).toArray(new String[featureVectorSize]);
+        if(bigrams.size() > bigramVectorSize)
+            selectedBigrams = bigrams.subList(0, bigramVectorSize).toArray(new String[bigramVectorSize]);
+        else
+            selectedBigrams = bigrams.toArray(new String[bigrams.size()]);
+        
         languagePrototypes = new HashMap<>();
+        /* Iterate over languages and for each language retain frequencies only 
+           for the selected bigrams. Divide the frequencies by the number of
+           documents. */
         for (String lang : docsPerLanguage.keySet()) {            
-            double[] languageVector = new double[featureVectorSize];
+            double[] languageVector = new double[selectedBigrams.length];
             FDistribution languageFDist = languageFDistributions.get(lang);
             double numDocs = docsPerLanguage.get(lang);
-            for (int i = 0; i < featureVectorSize && i < bigrams.size(); i++) {
+            for (int i = 0; i < selectedBigrams.length; i++) {
                 String ngram = bigrams.get(i);
                 Double value = languageFDist.get(ngram);
                 languageVector[i] = value != null ? value / numDocs : 0.0;
@@ -89,9 +117,10 @@ public class NearestPrototypeClassifier implements IClassifier {
     }
     
     /**
+     * Predicts the language for a given document.
      * 
-     * @param document
-     * @return 
+     * @param document document to process
+     * @return predicted language
      */
     @Override
     public String predict(String document) {
@@ -99,6 +128,7 @@ public class NearestPrototypeClassifier implements IClassifier {
             Logger.getLogger(NearestPrototypeClassifier.class.getName()).log(Level.SEVERE, "No model found.");
             return DEFAULT_LANG;
         }
+        /* Create a bigram vector for the document. */
         HashMap<String, Double> docNgramDist = DocumentTools.getDocumentBigramFDistribution(document);
         double[] documentVector = new double[selectedBigrams.length];
         for (int i = 0; i < selectedBigrams.length; i++) {
@@ -106,6 +136,7 @@ public class NearestPrototypeClassifier implements IClassifier {
             Double value = docNgramDist.containsKey(bigram) ? docNgramDist.get(bigram) : 0.0;
             documentVector[i] = value;
         }
+        /* Compare the vector with the language prototypes. */
         String predicted = DEFAULT_LANG;
         double maxCosine = -2;
         for (Map.Entry<String, double[]> entry : languagePrototypes.entrySet()) {
@@ -118,6 +149,13 @@ public class NearestPrototypeClassifier implements IClassifier {
         return predicted;
     }
     
+    /**
+     * Evaluates the classifier on the give test set. 
+     * 
+     * @param testDocuments list of the documents for testing
+     * @param goldLabels list of the gold labels
+     * @return the result of the evaluation
+     */
     @Override
     public EvaluationResult evaluate(String[] testDocuments, String[] goldLabels){
         int correctlyClassified = 0;
@@ -133,6 +171,11 @@ public class NearestPrototypeClassifier implements IClassifier {
     } 
     
 
+    /**
+     * Stores the classifier model in a file.
+     * 
+     * @param fileName the name of the file name to store the model
+     */
     @Override
     public void saveModel(String fileName){
         try(BufferedWriter out = new BufferedWriter
@@ -155,6 +198,11 @@ public class NearestPrototypeClassifier implements IClassifier {
         }
     }
     
+    /**
+     * Loads a classifier model from file.
+     * 
+     * @param fileName the model file
+     */
     @Override
     public void loadModel(String fileName){
         try(BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(fileName), ENCODING))){
@@ -178,5 +226,6 @@ public class NearestPrototypeClassifier implements IClassifier {
         } catch (IOException ex) {
             Logger.getLogger(NearestPrototypeClassifier.class.getName()).log(Level.SEVERE, null, ex);
         }
+        System.out.println(selectedBigrams.length + " " + languagePrototypes.size());
     }
 }

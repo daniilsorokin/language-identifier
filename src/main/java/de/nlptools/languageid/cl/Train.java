@@ -10,7 +10,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
  * @author Daniil Sorokin <daniil.sorokin@uni-tuebingen.de>
  */
 public class Train {

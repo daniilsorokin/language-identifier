@@ -13,7 +13,8 @@ public class MathTools {
      * @return Cosine similarity value
      */
     public static double cosine(double[] a, double[] b) {
-        if(a.length != b.length) throw new RuntimeException();
+        if(a.length != b.length) throw new RuntimeException("Can't compute "
+                + "cosine distance between vectors of different length.");
         double amagn = 0.0, bmagn = 0.0, abproduct = 0.0;
         for (int i = 0; i < a.length; i++) {
             amagn += a[i]*a[i];

@@ -11,6 +11,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * This class contains static methods to read documents from files.
+ * 
  * @author Daniil Sorokin <daniil.sorokin@uni-tuebingen.de>
  */
 public class DocumentReader {
@@ -18,10 +20,11 @@ public class DocumentReader {
     public static final String ENCODING = "utf-8";
     
     /**
+     * Read the complete content of a document into a string.
      * 
-     * @param file
-     * @return
-     * @throws IOException 
+     * @param file a file object
+     * @return file content as a string
+     * @throws IOException if there is a problem reading the given file
      */
     public static String readContentFromFile(File file) throws IOException {
         String content = new String(Files.readAllBytes(file.toPath()), ENCODING);
@@ -49,9 +52,13 @@ public class DocumentReader {
     
     
     /**
+     * Reads all documents from a folder. The methods also checks if the language 
+     * labels are included in the document names. It returns a Dataset object
+     * with an array that contains the contents of the documents and the array
+     * of language labels if they were found.
      * 
-     * @param dir
-     * @return 
+     * @param dir a directory to read from
+     * @return a Dataset object
      */
     public static Dataset readDatasetFromFolder(String dir) {
         File dirFile = new File(dir);
@@ -76,6 +83,15 @@ public class DocumentReader {
         return new Dataset(documents, labels);
     }
 
+    
+    /**
+     * Read a set of documents based on a meta file. The meta file must contain
+     * a list of all documents to read and may contain language labels for each 
+     * document.
+     * 
+     * @param metaFileName the name of the metafile
+     * @return a Dataset object
+     */
     public static Dataset readDatasetFromMetaFile(String metaFileName) {
         File metaFile = new File(metaFileName);
         if (!metaFile.isFile()) return null;
@@ -83,7 +99,7 @@ public class DocumentReader {
         ArrayList<String> labelsList = new ArrayList<>();
         try (BufferedReader in = new BufferedReader(
                 new InputStreamReader(
-                new FileInputStream(metaFile), "UTF-8"))){
+                new FileInputStream(metaFile), ENCODING))){
             String line;
             while((line = in.readLine()) != null){
                 String[] columns = line.trim().split(",");
@@ -95,9 +111,10 @@ public class DocumentReader {
             Logger.getLogger(DocumentReader.class.getName()).log(Level.SEVERE, null, ex);
         }
         ArrayList<String> documentsList = new ArrayList<>();
+        String path = metaFile.getAbsoluteFile().getParent() + "/";
         for (String file : filesList) {
             try {
-                String content = DocumentReader.readContentFromFile(new File(file));
+                String content = DocumentReader.readContentFromFile(new File(path + file));
                 documentsList.add(content);
             } catch (IOException ex) {
                 Logger.getLogger(DocumentReader.class.getName()).log(Level.SEVERE, null, ex);
