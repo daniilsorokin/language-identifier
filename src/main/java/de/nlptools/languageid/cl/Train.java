@@ -123,7 +123,7 @@ public class Train {
     
     public static void printHelp(){
         System.out.printf("Usage: de.nlptools.languageid.cl.Train [options] trainingSet %n"
-                + "trainingSet :  a folder name that contains the documents or a meta file %n"
+                + "trainingSet :  a folder name that contains the documents %n"
                 + "               (see README for the training set format description)."
                 + "Options: %n"
                 + "    -t type      : type of the classifier: %n"

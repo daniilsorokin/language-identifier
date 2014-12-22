@@ -22,7 +22,6 @@ public class DocumentReaderTest {
     private static String[] files = new String[]{"test-folder/en_dummy1", 
                                                  "test-folder/en_dummy2", 
                                                  "test-folder/de_dummy3"};
-    private static String metafile = "metafile.txt";
     private static String folder = "test-folder";
     private static String content = "This is a test document.";
 
@@ -38,19 +37,6 @@ public class DocumentReaderTest {
                 Logger.getLogger(DocumentReaderTest.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        
-        try(BufferedWriter out = new BufferedWriter
-                            (new OutputStreamWriter(new FileOutputStream(metafile), ENCODING))) {
-            for (String file : files) {
-                if(file.contains("en"))
-                    out.write(file + "," + "en");
-                else 
-                    out.write(file + "," + "de");
-                out.newLine();
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(DocumentReaderTest.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
     
     @AfterClass
@@ -59,7 +45,6 @@ public class DocumentReaderTest {
             Files.delete(Paths.get(file));
         }
         Files.delete(Paths.get(folder));
-        Files.delete(Paths.get(metafile));
     }
 
     /**
@@ -98,19 +83,5 @@ public class DocumentReaderTest {
         Dataset expResult = new Dataset(documents, langs);
         Dataset result = DocumentReader.readDatasetFromFolder(folder);
         assertEquals(expResult, result);
-    }
-
-    /**
-     * Test of readDatasetFromMetaFile method, of class DocumentReader.
-     */
-    @Test
-    public void testReadDatasetFromMetaFile() {
-        System.out.println("Test readDatasetFromMetaFile() method.");
-        String[] documents = new String[]{content, content, content};
-        String[] langs = new String[]{"en", "en", "de"};
-        Dataset expResult = new Dataset(documents, langs);
-        Dataset result = DocumentReader.readDatasetFromMetaFile(metafile);
-        assertEquals(expResult, result);
-    }
-    
+    }    
 }

@@ -99,7 +99,6 @@ public class Predict {
     public static void printHelp(){
         System.out.printf("Usage: de.nlptools.languageid.cl.Predict [options] documentsSet %n"
                 + "documentSet : a folder name that contains the documents %n"
-                + "              or a meta file %n"
                 + "              or a single document %n"
                 + "Options:%n"
                 + "    -m modelFile : the name of the model file (default: NP.model)");

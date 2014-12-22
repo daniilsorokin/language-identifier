@@ -81,49 +81,5 @@ public class DocumentReader {
         if ( labelsList.size() == documentsList.size() )
             labels = labelsList.toArray(new String[labelsList.size()]);
         return new Dataset(documents, labels);
-    }
-
-    
-    /**
-     * Read a set of documents based on a meta file. The meta file must contain
-     * a list of all documents to read and may contain language labels for each 
-     * document.
-     * 
-     * @param metaFileName the name of the metafile
-     * @return a Dataset object
-     */
-    public static Dataset readDatasetFromMetaFile(String metaFileName) {
-        File metaFile = new File(metaFileName);
-        if (!metaFile.isFile()) return null;
-        ArrayList<String> filesList = new ArrayList<>();        
-        ArrayList<String> labelsList = new ArrayList<>();
-        try (BufferedReader in = new BufferedReader(
-                new InputStreamReader(
-                new FileInputStream(metaFile), ENCODING))){
-            String line;
-            while((line = in.readLine()) != null){
-                String[] columns = line.trim().split(",");
-                filesList.add(columns[0]);
-                if (columns.length > 1)
-                    labelsList.add(columns[1]);
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(DocumentReader.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        ArrayList<String> documentsList = new ArrayList<>();
-        String path = metaFile.getAbsoluteFile().getParent() + "/";
-        for (String file : filesList) {
-            try {
-                String content = DocumentReader.readContentFromFile(new File(path + file));
-                documentsList.add(content);
-            } catch (IOException ex) {
-                Logger.getLogger(DocumentReader.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }        
-        String[] documents = documentsList.toArray(new String[documentsList.size()]);
-        String[] labels = {};
-        if ( labelsList.size() == documentsList.size() )
-            labels = labelsList.toArray(new String[labelsList.size()]);
-        return new Dataset(documents, labels);
-    }    
+    }  
 }

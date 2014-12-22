@@ -36,7 +36,7 @@ document in the training set and then uses them to train a linear svm classifier
 This approaches employs an external Liblinear library (Fan et al. 2008).
 
 In both cases the amount of the considered bigrams is limited to 10000 most frequent
-(this number was determined based on a separate development set).
+(this number was determined on a separate development set).
 
 ###Evaluation
 
@@ -46,7 +46,13 @@ difficult in their experiments. To train the classifiers and to select the param
 a different Wikipedia dataset from Lui and Baldwin (2011) was used (the Wikipedia A 
 partition is used for training and Wikipedia B partition for the development). 
 
-Accuracy on the Wikipedia dataset from Baldwin and Lui (2010):
+NP classifier accuracy on the Wikipedia dataset from Baldwin and Lui (2010):
+
+
+
+Liblinear classifier accuracy on the Wikipedia dataset from Baldwin and Lui (2010):
+
+
 
 ### References
 * W. B. Cavnar and J. M. Trenkle. “N-Gram-Based Text Categorization.” Proceedings of the Third Symposium on Document Analysis and Information Retrieval, 1994.
@@ -57,6 +63,8 @@ Accuracy on the Wikipedia dataset from Baldwin and Lui (2010):
 
 Usage comment
 -------------
+
+The package includes pre-trained model for the NP and Liblinear classifiers.
 
 The NP classifier doesn't depend on any external library!
 
@@ -73,7 +81,7 @@ To train an NP model:
     java -cp language-identifier.jar de.nlptools.languageid.cl.Train -m NP.model [training_set]
 
 To train a liblinear model: 
-    java -cp language-identifier.jar de.nlptools.languageid.cl.Train -t Liblinear -m Liblinear.model [training_set]
+    java -cp language-identifier.jar:liblinear-1.94.jar de.nlptools.languageid.cl.Train -t Liblinear -m Liblinear.model [training_set]
 
 To test a model: 
     java -cp language-identifier.jar de.nlptools.languageid.cl.Predict -m NP.model [test_set]
@@ -102,11 +110,3 @@ We use the same format for training and testing data as Baldwin and Lui (2010).
 The dataset should be either a list of documents contained in one folder, each 
 document should start with an ISO language code separated from the rest of the name
 with an underscore (eg. `de_mydocument.txt`).
-
-The other option is to use a meta file that lists the names of the documents and 
-the corresponding language labels separated by comma:
-
-    document_name,fr
-    document_name,en
-    document_name,de
-    document_name,bg
