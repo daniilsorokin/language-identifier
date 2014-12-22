@@ -64,7 +64,9 @@ Liblinear classifier accuracy on the Wikipedia dataset from Baldwin and Lui (201
 Usage comment
 -------------
 
-The package includes pre-trained model for the NP and Liblinear classifiers.
+The package includes pre-trained model for the NP and Liblinear classifiers 
+(the liblinear model consists of two files: the svm model `example.model` and 
+the list of the selected bigrams `example.model.sb`).
 
 The NP classifier doesn't depend on any external library!
 

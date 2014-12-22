@@ -7,16 +7,22 @@ import de.bwaldvogel.liblinear.Model;
 import de.bwaldvogel.liblinear.Parameter;
 import de.bwaldvogel.liblinear.Problem;
 import de.bwaldvogel.liblinear.SolverType;
-import de.nlptools.languageid.io.Dataset;
-import de.nlptools.languageid.io.DocumentReader;
+import static de.nlptools.languageid.classifiers.NearestPrototypeClassifier.ENCODING;
 import de.nlptools.languageid.tools.FDistribution;
 import de.nlptools.languageid.tools.DocumentTools;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,6 +35,8 @@ import java.util.logging.Logger;
 */
 public class LiblinearClassifier implements IClassifier{
 
+    public static final String ENCODING = "utf-8";
+    
     private String[] selectedBigrams;
     private Model model;
     private ArrayList<String> languageIndex;
@@ -154,11 +162,16 @@ public class LiblinearClassifier implements IClassifier{
      */    
     @Override
     public void saveModel(String fileName){
-        try {
+        try(BufferedWriter out = new BufferedWriter(new OutputStreamWriter
+                (new FileOutputStream(fileName + ".sb"), ENCODING))) {
+            for (String selectedBigram : selectedBigrams) {
+                out.write(selectedBigram + "\t");
+            }
             this.model.save(new File(fileName));
         } catch (IOException ex) {
             Logger.getLogger(LiblinearClassifier.class.getName()).log(Level.SEVERE, null, ex);
         }
+
     }
     
     /**
@@ -168,7 +181,10 @@ public class LiblinearClassifier implements IClassifier{
      */    
     @Override
     public void loadModel(String fileName){
-        try {
+        try(BufferedReader in = new BufferedReader(new InputStreamReader
+                (new FileInputStream(fileName + ".sb"), ENCODING))){
+            String line = in.readLine().trim();
+            selectedBigrams = line.split("\t");
             this.model = Model.load(new File(fileName));
         } catch (IOException ex) {
             Logger.getLogger(LiblinearClassifier.class.getName()).log(Level.SEVERE, null, ex);
