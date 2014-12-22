@@ -1,7 +1,5 @@
 package de.nlptools.languageid.classifiers;
 
-import de.nlptools.languageid.io.Dataset;
-import de.nlptools.languageid.io.DocumentReader;
 import de.nlptools.languageid.tools.FDistribution;
 import de.nlptools.languageid.tools.DocumentTools;
 import de.nlptools.languageid.tools.MathTools;

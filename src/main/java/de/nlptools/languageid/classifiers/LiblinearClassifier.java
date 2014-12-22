@@ -7,7 +7,6 @@ import de.bwaldvogel.liblinear.Model;
 import de.bwaldvogel.liblinear.Parameter;
 import de.bwaldvogel.liblinear.Problem;
 import de.bwaldvogel.liblinear.SolverType;
-import static de.nlptools.languageid.classifiers.NearestPrototypeClassifier.ENCODING;
 import de.nlptools.languageid.tools.FDistribution;
 import de.nlptools.languageid.tools.DocumentTools;
 import java.io.BufferedReader;
@@ -22,7 +21,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
