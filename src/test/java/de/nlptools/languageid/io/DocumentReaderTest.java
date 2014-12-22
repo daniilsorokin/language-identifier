@@ -28,7 +28,6 @@ public class DocumentReaderTest {
 
     @BeforeClass
     public static void setUpClass() {
-        System.out.println("*** Test DocumentReader class ***");
         File folderFile = new File(folder);
         folderFile.mkdir();
         for(String file : files){

@@ -3,7 +3,6 @@ package de.nlptools.languageid.classifiers;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -12,11 +11,6 @@ import static org.junit.Assert.*;
  * @author Daniil Sorokin <daniil.sorokin@uni-tuebingen.de>
  */
 public class NearestPrototypeClassifierTest {
-    
-    @BeforeClass
-    public static void setUpClass() {
-        System.out.println("*** Test NearestPrototypeClassifier class ***");
-    }
 
     /**
      * Test of loadModel method, of class NearestPrototypeClassifier.

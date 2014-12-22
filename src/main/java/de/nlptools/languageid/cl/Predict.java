@@ -25,7 +25,7 @@ public class Predict {
     
     public static void main(String[] args) {
         HashMap<String, String> parameters = readClArgs(args);
-        if (parameters == null || parameters.size() != 1) {
+        if (parameters == null || parameters.size() < 1) {
             System.out.println("Unknown set of option.");
             Train.printHelp();
             System.exit(1);

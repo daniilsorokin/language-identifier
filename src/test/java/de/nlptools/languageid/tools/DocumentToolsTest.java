@@ -1,10 +1,6 @@
 package de.nlptools.languageid.tools;
 
 import java.util.HashMap;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -12,11 +8,6 @@ import static org.junit.Assert.*;
  * @author Daniil Sorokin <daniil.sorokin@uni-tuebingen.de>
  */
 public class DocumentToolsTest {
-
-    @BeforeClass
-    public static void setUpClass() {
-        System.out.println("*** Test DocumentTools class ***");
-    }
     
     /**
      * Test of getDocumentBigramFDistribution method, of class DocumentTools.

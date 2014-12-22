@@ -144,7 +144,7 @@ public class LiblinearClassifier implements IClassifier{
             if (predicted.equals(goldLang)) correctlyClassified++;
         }
         double accuracy = (double) correctlyClassified / (double) numberOfDocuments;
-        return new EvaluationResult(accuracy, 0.0, 0.0, 0.0);
+        return new EvaluationResult(accuracy);
     }
     
     /**

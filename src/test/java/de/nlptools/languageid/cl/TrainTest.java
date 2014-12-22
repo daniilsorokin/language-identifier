@@ -1,7 +1,6 @@
 package de.nlptools.languageid.cl;
 
 import java.util.HashMap;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -10,18 +9,13 @@ import static org.junit.Assert.*;
  */
 public class TrainTest {
 
-    @BeforeClass
-    public static void setUpClass() {
-        System.out.println("Testing the Train class.");
-    }
-
     /**
      * Test of readClArgs method, of class Train.
      */
     @Test
     public void testReadClArgs1() {
-        System.out.println("Test readClArgs(), Run 1");
-        String[] args = new String[]{"train.in", "model.out"};
+        System.out.println("Test readClArgs() method, Run 1");
+        String[] args = new String[]{"-m","model.out","train.in", };
         HashMap<String, String> expResult = new HashMap<>();
         expResult.put(Train.DOCS_SET, "train.in");
         expResult.put(Train.MODEL_FILE, "model.out");
@@ -34,7 +28,7 @@ public class TrainTest {
      */
     @Test
     public void testReadClArgs2() {
-        System.out.println("Test readClArgs(), Run 2");
+        System.out.println("Test readClArgs() method, Run 2");
         String[] args = new String[]{"-t", "Liblinear", "-c", "5", "train.in"};
         HashMap<String, String> expResult = new HashMap<>();
         expResult.put(Train.CLASSIFIER, "Liblinear");
@@ -49,7 +43,7 @@ public class TrainTest {
      */
     @Test
     public void testReadClArgs3() {
-        System.out.println("Test readClArgs(), Run 3");
+        System.out.println("Test readClArgs() method, Run 3");
         String[] args = new String[]{};
         HashMap<String, String> result = Train.readClArgs(args);
         assertEquals(null, result);

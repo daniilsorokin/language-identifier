@@ -7,6 +7,8 @@ This file describes a java library for language identification.
 
 **License**: MIT
 
+https://github.com/daniilsorokin/language-identifier
+
 
 Language identification method
 ------------------------------
@@ -68,22 +70,16 @@ Command line use
 ----------------
 
 To train an NP model: 
-
-java -cp language-identifier.jar de.nlptools.languageid.cl.Train -m NP.model [training_set]
-
+    java -cp language-identifier.jar de.nlptools.languageid.cl.Train -m NP.model [training_set]
 
 To train a liblinear model: 
-
-java -cp language-identifier.jar de.nlptools.languageid.cl.Train -t Liblinear -m Liblinear.model [training_set]
-
+    java -cp language-identifier.jar de.nlptools.languageid.cl.Train -t Liblinear -m Liblinear.model [training_set]
 
 To test a model: 
-
-java -cp language-identifier.jar de.nlptools.languageid.cl.Predict -m NP.model [test_set]
+    java -cp language-identifier.jar de.nlptools.languageid.cl.Predict -m NP.model [test_set]
 
 To predict a label of an unknown document: 
-
-java -cp language-identifier.jar de.nlptools.languageid.cl.Predict -m NP.model [document]
+    java -cp language-identifier.jar de.nlptools.languageid.cl.Predict -m NP.model [document]
 
 
 Library use

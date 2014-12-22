@@ -1,6 +1,5 @@
 package de.nlptools.languageid.tools;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -8,11 +7,6 @@ import static org.junit.Assert.*;
  * @author Daniil Sorokin <daniil.sorokin@uni-tuebingen.de>
  */
 public class MathToolsTest {
-
-    @BeforeClass
-    public static void setUpClass() {
-        System.out.println("*** MathTool class testing ***");
-    }
 
     /**
      * Test of cosine method, of class MathTools.

@@ -3,7 +3,6 @@ package de.nlptools.languageid.tools;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -12,11 +11,6 @@ import static org.junit.Assert.*;
  */
 public class FDistributionTest {
     
-    @BeforeClass
-    public static void setUpClass() {
-        System.out.println("*** Test FDistribution class ***");
-    }
-
     /**
      * Test of update method, of class FDistribution.
      */
