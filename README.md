@@ -1,7 +1,7 @@
 language-identifier
 ===================
 
-This file describes a java library for language identification.
+This file describes a java library for automatic language identification.
 
 **Author**: Daniil Sorokin
 
@@ -13,16 +13,16 @@ https://github.com/daniilsorokin/language-identifier
 Language identification method
 ------------------------------
 
-The language identification method is base on the article by Cavnar and Trankle (1994) 
-with the modifications proposed in Baldwin and Lui (2010) and Lui and Baldwin (2011).
+The language identification method is based on the article by Cavnar and Trankle (1994) 
+with the some modifications proposed in Baldwin and Lui (2010) and Lui and Baldwin (2011).
 
 The language identification task is viewed as a supervised classification problem: 
 an algorithm has to assign a language label to a document based on the previous
 observations. The implemented method uses the statistics about the bigrams to 
 identify the language of a document. Baldwin and Lui (2010) test different ngrams 
-for this task and show that the bigrams is a good first choice for this task. 
+for this task and show that the bigrams is a good first choice. 
 
-The language identifier implements two approaches: a simple nearest prototype
+The language identifier tool implements two approaches: a simple nearest prototype
 approach (NP) and an approach that uses linear SVMs (Liblinear). 
 
 The NP classifier constructs language prototypes for each language it encounters 
@@ -32,19 +32,19 @@ the NP classifier compares the frequency distribution over bigrams for that docu
 with the prototypes using the cosine similarity. 
 
 The Liblinear classifier computes frequency distributions over bigrams for each
-document in the training set and then uses them to train a linear svm classifier.
+document in the training set and then uses them to train a linear SVM classifier.
 This approaches employs an external Liblinear library (Fan et al. 2008).
 
 In both cases the amount of the considered bigrams is limited to 10000 most frequent
-(this number was determined on a separate development set).
+(this number was determined by the author on a separate development set).
 
 ###Evaluation
 
-In order to evaluate the tool the Wikipedia dataset from Baldwin and Lui (2010)
-was taken. Baldwin and Lui (2010) not that the Wikipedia dataset was the most 
+In order to evaluate the tool, the Wikipedia dataset from Baldwin and Lui (2010)
+was taken. Baldwin and Lui (2010) note that the Wikipedia dataset was the most 
 difficult in their experiments. To train the classifiers and to select the parameters 
 a different Wikipedia dataset from Lui and Baldwin (2011) was used (the Wikipedia A 
-partition is used for training and Wikipedia B partition for the development). 
+partition is used for training and the Wikipedia B partition for the development). 
 
 NP classifier accuracy on the Wikipedia dataset from Baldwin and Lui (2010):
 
@@ -64,15 +64,15 @@ Liblinear classifier accuracy on the Wikipedia dataset from Baldwin and Lui (201
 Usage comment
 -------------
 
-The package includes pre-trained model for the NP and Liblinear classifiers 
-(the liblinear model consists of two files: the svm model `example.model` and 
-the list of the selected bigrams `example.model.sb`).
+The package includes pre-trained model for the NP classifiers (`NP.model`) and
+the Liblinear classifier (the liblinear model consists of two files: the svm 
+model `Liblinear.model` and the list of the selected bigrams `Liblinear.model.sb`).
 
 The NP classifier doesn't depend on any external library!
 
-In order to use the Liblinear classifier you have to download the Java implementation
-of the Liblinear library here: http://liblinear.bwaldvogel.de/
-Make sure it is in the classpath before running the program!
+In order to use the Liblinear classifier you have make sure that
+the Java implementation of the Liblinear library (http://liblinear.bwaldvogel.de/)
+is in the classpath.
 
 The tool always assumes that the encoding of the input is UTF-8.
 
@@ -80,7 +80,7 @@ Command line use
 ----------------
 
 To train an NP model: 
-    java -cp language-identifier.jar de.nlptools.languageid.cl.Train -m NP.model [training_set]
+    java -cp language-identifier.jar de.nlptools.languageid.cl.Train -t NP -m NP.model [training_set]
 
 To train a liblinear model: 
     java -cp language-identifier.jar:liblinear-1.94.jar de.nlptools.languageid.cl.Train -t Liblinear -m Liblinear.model [training_set]
@@ -108,7 +108,7 @@ Library use
 File format for training and testing
 ------------------------------------
 
-We use the same format for training and testing data as Baldwin and Lui (2010).
-The dataset should be either a list of documents contained in one folder, each 
-document should start with an ISO language code separated from the rest of the name
-with an underscore (eg. `de_mydocument.txt`).
+The format for training and testing data is the same as in Baldwin and Lui (2010).
+The dataset should be a list of documents contained in one folder, each document name 
+should start with an ISO language code separated from the rest of the name
+with an underscore (e.g. `de_mydocument.txt`).
