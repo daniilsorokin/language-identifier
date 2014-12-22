@@ -89,14 +89,14 @@ java -cp language-identifier.jar de.nlptools.languageid.cl.Predict -m NP.model [
 Library use
 -----------
 
-        `Dataset traing = DocumentReader.readDatasetFromFolder(metaTrain);
+        Dataset traing = DocumentReader.readDatasetFromFolder(metaTrain);
         
         NearestPrototypeClassifier classifier = new NearestPrototypeClassifier();
         classifier.build(train.getDocuments(), train.getLabels(), 10000);
 
         Dataset test = DocumentReader.readDatasetFromFolder(metaTest);
         EvaluationResult results = classifier.evaluate(test.getDocuments(), test.getLabels());
-        double accuracy = results.getAccuracy();`
+        double accuracy = results.getAccuracy();
 
 
 File format for training and testing
@@ -105,12 +105,12 @@ File format for training and testing
 We use the same format for training and testing data as Baldwin and Lui (2010).
 The dataset should be either a list of documents contained in one folder, each 
 document should start with an ISO language code separated from the rest of the name
-with an underscore (eg. de_mydocument.txt).
+with an underscore (eg. `de_mydocument.txt`).
 
 The other option is to use a meta file that lists the names of the documents and 
 the corresponding language labels separated by comma:
 
-document_name,fr
-document_name,en
-document_name,de
-document_name,bg
+    document_name,fr
+    document_name,en
+    document_name,de
+    document_name,bg
