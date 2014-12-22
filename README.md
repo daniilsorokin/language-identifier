@@ -104,6 +104,9 @@ To test a model:
 To predict a label of an unknown document: 
     java -cp language-identifier.jar de.nlptools.languageid.cl.Predict -m NP.model [document]
 
+To predict a label of an unknown document using the Liblinear model: 
+    java -cp language-identifier.jar:liblinear-1.94.jar de.nlptools.languageid.cl.Predict -m Liblinear.model [document]
+
 
 Library use
 -----------
