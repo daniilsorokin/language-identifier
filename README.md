@@ -2,6 +2,7 @@ language-identifier
 ===================
 
 This file describes a java library for automatic language identification.
+The tool can identify 68 different languages.
 
 **Author**: Daniil Sorokin
 
@@ -46,12 +47,22 @@ difficult in their experiments. To train the classifiers and to select the param
 a different Wikipedia dataset from Lui and Baldwin (2011) was used (the Wikipedia A 
 partition is used for training and the Wikipedia B partition for the development). 
 
-NP classifier accuracy on the Wikipedia dataset from Baldwin and Lui (2010):
+**Results**
+
+Development set: Wikipedia dataset from Baldwin and Lui (2011)
+
+Test set:        Wikipedia dataset from Baldwin and Lui (2010)
+
+NP classifier accuracy on the development set:        0.841
+
+NP classifier accuracy on the test set:               0.767
+
+Liblinear classifier accuracy on the development set: 0.960
+
+Liblinear classifier accuracy on the test set:        0.783
 
 
-
-Liblinear classifier accuracy on the Wikipedia dataset from Baldwin and Lui (2010):
-
+These numbers are comparable with results reported by Baldwin and Lui (2010) on the Wikipedia dataset.
 
 
 ### References
@@ -67,6 +78,8 @@ Usage comment
 The package includes pre-trained model for the NP classifiers (`NP.model`) and
 the Liblinear classifier (the liblinear model consists of two files: the svm 
 model `Liblinear.model` and the list of the selected bigrams `Liblinear.model.sb`).
+
+Both model are able to identify 68 different languages.
 
 The NP classifier doesn't depend on any external library!
 
