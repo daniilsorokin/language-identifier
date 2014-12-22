@@ -42,5 +42,6 @@ public class LiblinearClassifierTest {
         assertEquals(prediction2, expectedPrediction2);
         
         Files.delete(Paths.get(modelFileName));
+        Files.delete(Paths.get(modelFileName + ".sb"));
     }
 }
