@@ -15,7 +15,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>de.nlptools.languageid.cl.Train</mainClass>
+                            <mainClass>de.nlptools.languageid.cl.Predict</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
