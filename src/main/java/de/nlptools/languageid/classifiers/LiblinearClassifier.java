@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -83,8 +84,10 @@ public class LiblinearClassifier implements IClassifier{
                 bigramDist.updateAll(docNgramDist);
         }
         List<String> bigrams = bigramDist.getSortedKeys();
-        selectedBigrams = bigrams.subList(0, bigramVectorSize)
-                .toArray(new String[bigramVectorSize]);
+        if(bigrams.size() > bigramVectorSize)
+            selectedBigrams = bigrams.subList(0, bigramVectorSize).toArray(new String[bigramVectorSize]);
+        else
+            selectedBigrams = bigrams.toArray(new String[bigrams.size()]);
         
         languageIndex = new ArrayList<>(languages);
         Problem problem = new Problem();
@@ -99,7 +102,7 @@ public class LiblinearClassifier implements IClassifier{
             problem.y[i] = langId;
             HashMap<String, Double> docNgramDist = documentVectors.get(i);
             List<Feature> vector = new ArrayList<>();
-            for (int j = 0; j < bigramVectorSize; j++) {
+            for (int j = 0; j < selectedBigrams.length; j++) {
                 String ngram = selectedBigrams[j];
                 Double value = docNgramDist.get(ngram);
                 if(value != null) vector.add(new FeatureNode(j + 1, value));
@@ -165,6 +168,10 @@ public class LiblinearClassifier implements IClassifier{
             for (String selectedBigram : selectedBigrams) {
                 out.write(selectedBigram + "\t");
             }
+            out.newLine();
+            for (String language : languageIndex) {
+                out.write(language + "\t");
+            }
             this.model.save(new File(fileName));
         } catch (IOException ex) {
             Logger.getLogger(LiblinearClassifier.class.getName()).log(Level.SEVERE, null, ex);
@@ -183,6 +190,8 @@ public class LiblinearClassifier implements IClassifier{
                 (new FileInputStream(fileName + ".sb"), ENCODING))){
             String line = in.readLine().trim();
             selectedBigrams = line.split("\t");
+            line = in.readLine().trim();
+            languageIndex = new ArrayList<>(Arrays.asList(line.split("\t")));
             this.model = Model.load(new File(fileName));
         } catch (IOException ex) {
             Logger.getLogger(LiblinearClassifier.class.getName()).log(Level.SEVERE, null, ex);

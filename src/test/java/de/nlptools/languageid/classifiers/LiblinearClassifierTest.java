@@ -26,11 +26,11 @@ public class LiblinearClassifierTest {
         String[] langs = new String[]{"en", "en", "de"};        
         String modelFileName = "test.model";
         
-        NearestPrototypeClassifier classifier1 = new NearestPrototypeClassifier();
+        LiblinearClassifier classifier1 = new LiblinearClassifier();
         classifier1.build(documents, langs, 1000);
         classifier1.saveModel(modelFileName);
         
-        NearestPrototypeClassifier classifier2 = new NearestPrototypeClassifier();
+        LiblinearClassifier classifier2 = new LiblinearClassifier();
         classifier2.loadModel(modelFileName);
         
         String prediction1 = classifier2.predict(contentEn);        
