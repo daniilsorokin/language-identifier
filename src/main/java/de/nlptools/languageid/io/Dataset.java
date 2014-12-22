@@ -45,7 +45,7 @@ public class Dataset {
      * @return true if there are labels for the stored documents, false otherwise
      */
     public boolean hasLabels(){
-        return labels == null || labels.length == 0;
+        return labels != null && labels.length != 0;
     }
 
     @Override

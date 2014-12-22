@@ -10,6 +10,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * A class to train a classifier from the command line.
+ * 
  * @author Daniil Sorokin <daniil.sorokin@uni-tuebingen.de>
  */
 public class Train {
@@ -76,13 +78,18 @@ public class Train {
     public static final String LIBLINEAR_CLASSIFIER = "Liblinear";
     public static final String DEFAULT_CLASSIFIER = NP_CLASSIFIER;
     
-    public static final String NUM_FOLDS = "numFolds";
     public static final String NUM_FEATURES = "numFeatures";
     public static final String CLASSIFIER = "classifier";
     public static final String C_PARAMETER = "cParameter";
     public static final String MODEL_FILE = "modelFile";
     public static final String DOCS_SET = "documentsSet";
     
+    /**
+     * Read the command line arguments.
+     * 
+     * @param args command line arguments
+     * @return parameters as a map
+     */
     public static HashMap<String, String> readClArgs(String[] args){
         if (args.length == 0) return null;
         HashMap<String, String> parameters = new HashMap<>();
@@ -97,11 +104,11 @@ public class Train {
                 case 'c':
                     parameters.put(C_PARAMETER, args[i+1]);
                     break;
+                case 'm':
+                    parameters.put(MODEL_FILE, args[i+1]);
+                    break;
                 case 'n':
                     parameters.put(NUM_FEATURES, args[i+1]);
-                    break;
-                case 'v':
-                    parameters.put(NUM_FOLDS, args[i+1]);
                     break;
                 default:
                     return null;
@@ -111,25 +118,20 @@ public class Train {
         }        
         if (args.length <= i) return null;
         parameters.put(DOCS_SET, args[i]);
-        if (args.length > i + 1) parameters.put(MODEL_FILE, args[i+1]);
         return parameters;
     }
     
     public static void printHelp(){
-        System.out.printf("Usage: de.nlptools.languageid.cl.Train [options] trainingSet [modelFile] %n"
-                + "trainingSet : a folder containing a list of documents, each "
-                + "document name should start with an ISO language code separated "
-                + "with _ from the rest of the name %n"
-                + "             or a meta file that contains a document file names "
-                + "in the first column and the language labels in the second column. %n"
-                + "modelFile : name of the file to save the model. %n"
+        System.out.printf("Usage: de.nlptools.languageid.cl.Train [options] trainingSet %n"
+                + "trainingSet :  a folder name that contains the documents or a meta file %n"
+                + "               (see README for the training set format description)."
                 + "Options: %n"
-                + "    -t type : type of the classifier: %n"
-                + "         NP -- nearest prototype classifier (default) %n"
-                + "         Liblinear -- SVM based classifier (requires the external Liblinear library) %n"
-                + "    -c cost : cost parameter for Liblinear classifier (default: 1.0) %n"
-                + "    -n number : number of features to select for document representation (default: 10000) %n"
-//                + "    -v folds : number of fold for cross-validation (default: no CV) %n"
+                + "    -t type      : type of the classifier: %n"
+                + "              NP -- nearest prototype classifier (default) %n"
+                + "       Liblinear -- SVM based classifier (requires the external Liblinear library) %n%n"
+                + "    -m modelFile : the name of the file to save the model (default: [classifier_type].model) %n"
+                + "    -c cost      : cost parameter for the Liblinear classifier (default: 1.0) %n"
+                + "    -n number    : number of bigrams to select for document representation (default: 10000) %n"
         );
     }
     

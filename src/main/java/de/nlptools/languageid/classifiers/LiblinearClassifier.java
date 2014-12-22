@@ -28,32 +28,6 @@ import java.util.logging.Logger;
  * @author Daniil Sorokin <daniil.sorokin@uni-tuebingen.de>
 */
 public class LiblinearClassifier implements IClassifier{
-    
-    public static void main(String[] args) {
-        try {
-            Class.forName( "de.bwaldvogel.liblinear.Linear" );
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(LiblinearClassifier.class.getName())
-                        .log(Level.SEVERE, "Liblinear is not found! This "
-                        + "classifier makes use of an external LibLinear library. "
-                        + "\n Please check that the liblinear-1.94.jar is in the classpath.");
-            return;
-        } 
-        String dir = "/home/dsorokin/Downloads/ijcnlp2011-langid/";
-        Dataset train = DocumentReader.readDatasetFromFolder(dir + "wikiraw/domain/");
-
-        LiblinearClassifier classifier = new LiblinearClassifier();
-        classifier.setC(128.0);
-        System.out.println("Building the classifier.");
-        classifier.build(train.getDocuments(), train.getLabels(), 3000);
-
-        System.out.println("Classifying lang documents.");
-        Dataset test = DocumentReader.readDatasetFromFolder(dir + "wikiraw/lang/");
-        System.out.println("Classifying lang documents.");
-        EvaluationResult results = classifier.evaluate(test.getDocuments(), test.getLabels());
-        double accuracy = results.getAccuracy();
-        System.out.println("Accuracy: " + accuracy);
-    }
 
     private String[] selectedBigrams;
     private Model model;

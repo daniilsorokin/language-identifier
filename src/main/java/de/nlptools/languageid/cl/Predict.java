@@ -17,22 +17,24 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * A class to use a classifier from the command line.
+ * 
  * @author Daniil Sorokin <daniil.sorokin@uni-tuebingen.de>
  */
 public class Predict {
     
     public static void main(String[] args) {
         HashMap<String, String> parameters = readClArgs(args);
-        if (parameters == null || parameters.size() != 2) {
+        if (parameters == null || parameters.size() != 1) {
             System.out.println("Unknown set of option.");
             Train.printHelp();
             System.exit(1);
         }
         
-        String modelFile = parameters.get(Train.MODEL_FILE);
         String testSet = parameters.get(Train.DOCS_SET);
-        
         String classifierType = Train.DEFAULT_CLASSIFIER;
+        String modelFile = parameters.containsKey(Train.MODEL_FILE) ?
+                parameters.get(Train.MODEL_FILE) : classifierType + ".model";
         try(BufferedReader in = new BufferedReader
             (new InputStreamReader(new FileInputStream(modelFile), 
                     NearestPrototypeClassifier.ENCODING))){
@@ -58,15 +60,11 @@ public class Predict {
                                 + "classifier makes use of an external LibLinear library. "
                                 + "\n Please check that the liblinear-1.94.jar is in the classpath.");
                 System.exit(1);
-            } catch ( NumberFormatException ex){
-                Logger.getLogger(LiblinearClassifier.class.getName())
-                        .log(Level.SEVERE, "C parameter must be a number.");
-                System.exit(1);
             }
         } else if (classifierType.equals("NP")) {
             classifier = new NearestPrototypeClassifier();
         } else {
-            Train.printHelp();
+            Predict.printHelp();
             System.exit(1);
         }
         
@@ -84,8 +82,7 @@ public class Predict {
             }
         } else if (testFile.isDirectory()) {
             Dataset test = DocumentReader.readDatasetFromFolder(testSet);
-//            if (test.hasLabels()){
-            if (true){
+            if (test.hasLabels()){
                 EvaluationResult results = classifier.evaluate(test.getDocuments(), test.getLabels());
                 double accuracy = results.getAccuracy();
                 System.out.println("Accuracy: " + accuracy);
@@ -100,11 +97,11 @@ public class Predict {
     }
     
     public static void printHelp(){
-        System.out.printf("Usage: de.nlptools.languageid.cl.Predict documentsSet modelFile %n"
-                + "modelFile : name of the model file. %n"
-                + "documentSet : a folder containing the documents or a meta file %n"
-                + "         with a list of file names or single file name. %n"
-                + "         If the documentSet contains gold labels the tool %n"
-                + "         perfomes evaluation with the given model. %n");
+        System.out.printf("Usage: de.nlptools.languageid.cl.Predict [options] documentsSet %n"
+                + "documentSet : a folder name that contains the documents %n"
+                + "              or a meta file %n"
+                + "              or a single document %n"
+                + "Options:%n"
+                + "    -m modelFile : the name of the model file (default: NP.model)");
     }
 }

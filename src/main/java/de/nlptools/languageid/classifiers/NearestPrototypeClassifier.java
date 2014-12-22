@@ -29,22 +29,6 @@ import java.util.logging.Logger;
  * @author Daniil Sorokin <daniil.sorokin@uni-tuebingen.de>
  */
 public class NearestPrototypeClassifier implements IClassifier {
-        
-    public static void main(String[] args) {
-        String dir = "/home/dsorokin/Downloads/ijcnlp2011-langid/";
-//        Dataset train = DocumentReader.readDatasetFromMetaFile(dir + "metadata");
-        Dataset train = DocumentReader.readDatasetFromFolder(dir + "wikiraw/domain/");
-        
-        NearestPrototypeClassifier classifier = new NearestPrototypeClassifier();
-        System.out.println("Building the classifier.");
-        classifier.build(train.getDocuments(), train.getLabels(), 3000);
-
-        Dataset test = DocumentReader.readDatasetFromFolder(dir + "wikiraw/lang/");
-        System.out.println("Classifying lang documents.");
-        EvaluationResult results = classifier.evaluate(test.getDocuments(), test.getLabels());
-        double accuracy = results.getAccuracy();
-        System.out.println("Accuracy: " + accuracy);
-    }
     
     public static final String ENCODING = "utf-8";
     public static final String MODEL_NAME = "LanguagePrototypeClassifierModel";    
@@ -226,6 +210,5 @@ public class NearestPrototypeClassifier implements IClassifier {
         } catch (IOException ex) {
             Logger.getLogger(NearestPrototypeClassifier.class.getName()).log(Level.SEVERE, null, ex);
         }
-        System.out.println(selectedBigrams.length + " " + languagePrototypes.size());
     }
 }
