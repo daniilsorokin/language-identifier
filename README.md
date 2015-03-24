@@ -79,7 +79,7 @@ The package includes pre-trained model for the NP classifiers (`NP.model`) and
 the Liblinear classifier (the liblinear model consists of two files: the svm 
 model `Liblinear.model` and the list of the selected bigrams `Liblinear.model.sb`).
 
-Both model are able to identify 68 different languages.
+Both models are able to identify 68 different languages.
 
 The NP classifier doesn't depend on any external library!
 
